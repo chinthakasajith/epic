@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<calendar>
+	<year whichyear="2012" id="1">
+		<month name="January" id="1">
+			
+				<holidayList date="Jan 01st" day="Friday"><![CDATA[New Year's Day]]></holidayList>
+				<holidayList date="Jan 14th" day="Friday"><![CDATA[Pongal, Harvest Festival of South India]]></holidayList>
+				<holidayList date="Jan 26th" day="Wednesday"><![CDATA[India Republic Day]]></holidayList>
+			
+				
+				<holidayList date="Jan 17th" day="Monday"><![CDATA[Martin Luther King, Jr. Day]]></holidayList>
+			
+		</month>
+		<month name="February" id="2">
+			
+				<holidayList date="Feb 15th" day="Tuesday"><![CDATA[Milad-Un-Nabi, Mawlid an-Nabi – Birth of the Islamic Prophet Muhammad.]]></holidayList>
+			
+			
+				<holidayList date="Feb 21st" day="Monday"><![CDATA[President's Day]]></holidayList>
+			
+		</month>
+		<month name="March" id="3">
+			
+				<holidayList date="Mar 01st" day="Thursday"><![CDATA[Mahashivratri / Maha Sivaratri, Great Night of Shiva – offerings of Bael (Bilva) leaves to the Lord Shiva, a Hindu festival]]></holidayList>
+				<holidayList date="Mar 19th" day="Saturday"><![CDATA[Holi, Hindu festival of colours]]></holidayList>
+			
+		</month>
+		<month name="April" id="4">
+			
+				<holidayList date="Apr 16nd" day="Saturday"><![CDATA[Mahavir Jayanthi, Birth of Mahavira, the last Tirthankara – the most important religious holiday in Jainism]]></holidayList>
+				<holidayList date="Apr 22nd" day="Friday"><![CDATA[Good Friday, Death of Jesus – Christian holiday]]></holidayList>
+				<holidayList date="Apr 25th" day="Monday"><![CDATA[Easter Monday, Resurrection of Jesus – Christian holiday]]></holidayList>
+			
+				<holidayList date="Apr 24th" day="Sunday"><![CDATA[Easter]]></holidayList>
+			
+		</month>
+		<month name="May" id="5">
+			
+				<holidayList date="May 17th" day="Tuesday"><![CDATA[Buddha Purnima - Vesak Day - Celebrates birth, enlightenment, and death of Buddha]]></holidayList>
+			
+			
+				<holidayList date="May 8th" day="Sunday"><![CDATA[Mother's Day]]></holidayList>
+				<holidayList date="May 30th" day="Monday"><![CDATA[Memorial Day]]></holidayList>
+			
+		</month>
+		<month name="June" id="6">
+			
+			
+				<holidayList date="June 19th" day="Sunday"><![CDATA[Father's Day]]></holidayList>
+			
+		</month>
+		<month name="July" id="7">
+			
+				<holidayList date="Jul 4th" day="Monday"><![CDATA[Independence Day]]></holidayList>
+			
+		</month>
+		<month name="August" id="8">
+			
+				<holidayList date="Aug 13th" day="Saturday"><![CDATA[Raksha Bandhan - Hindu Festival celebrated mainly in northern India]]></holidayList>
+				<holidayList date="Aug 15th" day="Monday"><![CDATA[Independence Day]]></holidayList>
+				<holidayList date="Aug 22nd" day="Monday"><![CDATA[Krishna Janmashtami / Srikrishna Jayanti - Birth of Krishna – a Hindu festival celebrating birth of Lord Krishna, an avatar of god Vishnu]]></holidayList>
+				<holidayList date="Aug 30th" day="Tuesday"><![CDATA[Eid ul-Fitr – End of Ramadan, according to Islamic Calendar]]></holidayList>
+			
+		</month>
+		<month name="September" id="9">
+			
+				<holidayList date="Sep 1st" day="Thursday"><![CDATA[Ganesh Chaturthi - Hindu Festival to celebrate the birthday of Lord Ganesh (Ganesha). Anant Chaturdashi will be celebrated on the last day of Ganesh Chaturthi, Monday, 12 September 2011.]]></holidayList>
+				<holidayList date="Sep 28th" day="Wednesday"><![CDATA[Dussehra - Vijaya Dashami – Hindu festival]]></holidayList>
+			
+		</month>
+		<month name="October" id="10">
+			
+				<holidayList date="Oct 2nd" day="Sunday"><![CDATA[Gandhi Jayanti - Mahatma Gandhi's Birthday]]></holidayList>
+				<holidayList date="Oct 26th" day="Wednesday"><![CDATA[Deepavali / Diwali - Festival of Lights – a very important Hindu festival]]></holidayList>
+			
+		</month>
+		<month name="November" id="11">
+			
+				<holidayList date="Nov 6th" day="Sunday"><![CDATA[Idu'l Zuha/Bakrid - Eid al-Adha – Feast of the Sacrifice, according to Islamic Calendar]]></holidayList>
+				<holidayList date="Nov 10th" day="Friday"><![CDATA[Guru Nanak Jayanti - Guru Nanak's Birthday – Sikh Festival]]></holidayList>
+				<holidayList date="Nov 26th" day="Saturday"><![CDATA[Muharram - Islamic New Year]]></holidayList>
+			
+		</month>
+		<month name="December" id="12">
+			
+				<holidayList date="Dec 25th" day="Sunday"><![CDATA[Christmas Day - Birth of Jesus – one of Christian most important holidays.]]></holidayList>
+				<holidayList date="Dec 26th" day="Monday"><![CDATA[Boxing Day - The day after Christmas – Christian Holiday]]></holidayList>
+			
+		</month>
+	</year> <!-- 2012 Year Tag [End] -->
+	
+</calendar>

@@ -1,0 +1,94 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.system.util.variable;
+
+/**
+ *
+ * @author upul
+ */
+public class SectionVarList {
+
+    
+     public static final String DEFAULTSECTION = "DEFAULT";//to set login Audittrace
+    //administration sections
+    public static final String USERMANAGEMENT = "USRMGT";
+    public static final String PROFILEMANAGEMENT = "PRFMGT";
+    public static final String SYSTEMCONFIGMANAGEMENT = "SYSCON";
+    public static final String REPORTMANAGMENT = "RPTMGT";
+    public static final String TRANSACTIONMGT = "TXNMGT";
+    public static final String TEMPLATEMGT = "TMPMGT";
+    public static final String CREDITSCOREMGT = "CRDTSC";
+    public static final String SECURITYQUESTIONMGT = "ADSQMGT";    
+    
+    //CAMM sections    
+     public static final String APPLICATIONASSIGN = "CMASGN";
+     public static final String CAPTURE_DATA = "CAPTDATA";
+     public static final String DOCUMENTVERIFY = "DOCVER";
+     
+     public static final String APPLICATIONCHEKING = "APPCHK";
+     public static final String APPLICATIONAPPROVE = "CNFRM";
+     
+     public static final String SERVER_DETAILS = "SWSTDE";
+     public static final String KEY_MAMAGEMENT = "KEYMGT";
+     
+     //CPMM section
+     public static final String  EMBOSSINGMGT = "CEMGT";
+     public static final String DISTRIBUTION ="CPCPDB";
+     public static final String  REQUESTCONFIRM = "REQCONF";
+     public static final String BULK_PERSONALIZATION ="BULEMB";
+     
+     //customer call center sections
+     public static final String CALL_CENTER_SEARCH="CALCEN";     
+     
+     public static final String CALL_CENTER_APPLICATION="CCAPPL";
+     public static final String CALL_CENTER_CUSTOMER="CCCUST";
+     public static final String CALL_CENTER_ACCOUNT="CCACCO";
+     public static final String CALL_CENTER_CARD="CCCARD";
+     
+     //acquire call center sections
+     public static final String ACQ_CALL_CENTER_MERCUS="ACCMCU";
+     public static final String ACQ_CALL_CENTER_MERLOC="ACCMLO";
+     public static final String ACQ_CALL_CENTER_TERMINAL="ACCTER";
+     
+     //MTMM sections
+     public static final String  TERMINALMGT = "MTTERMGT";
+     public static final String MERCHANTMGT = "MTMERMGT";
+     public static final String MANUAL_TXN = "MTMANTXN";
+     
+     // SWITCH 
+    public static final String LISTENERCONFIG = "LISCON";
+    public static final String RESPONCE_CODE_MGT = "RPCDMGT";
+    public static final String CHANEL_CINFIG = "CHACON";
+    public static final String SERVER_SONFIG = "SRMCON";
+    public static final String SYS_MSG = "SYSMSG";
+    
+    // Back Office
+    public static final String LIMIT_INCREMENT = "BOCLI";
+    public static final String CARD_RENEW = "BOCREN";
+    public static final String EOD_FILE_GENR = "BOEFGN";
+    public static final String EOD_PROCESS_MGT = "BOEODPM";
+    public static final String GL_LEDGER_MGT = "BOGLMGT";
+    public static final String STANDING_ORDER = "BOCSO";
+    public static final String PAYMENT = "BOPAY";
+    public static final String INSTALLMENTPLAN = "BOIPPP";
+    public static final String MANUAL_ADJUSTMENT = "BOMAMG";
+
+    //PRE_PERSONAL SECTIONS
+    public static final String PRE_PERSONAL_CD = "PRPREMGT";
+    
+    // REPORT EXPLORER 
+    
+    public static final String CARD_APPLICATION_REPORT ="CRAPRE";
+    
+    //Collections and Recoveries       
+    public static final String RECOVERY_CALL_CENTER ="RCCSSC";
+    
+    //common configurations sections
+    public static final String APPLICATION_PROCESSING_CONFIG ="ADIAPC";
+    
+        
+    
+    
+}

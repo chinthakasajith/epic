@@ -1,0 +1,636 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.camm.applicationproccessing.capturedata.servlet;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.camm.applicationproccessing.assigndata.bean.ApplicationAssignBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.AssetBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.AssetLiabilityTypeBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardApplicationStatusBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardBankDetailsBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardExpensesBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardIncomeBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardagainstFDApplicationBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CustomerEmploymentBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CustomerPersonalBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.DocumentUploadBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.EstablishmentAssetsBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.EstablishmentDetailsBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.EstablishmentLiabilityBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.IdBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.LiabilityBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.SupplementaryApplicationBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.businesslogic.ApplicationCheckingManager;
+import com.epic.cms.camm.applicationproccessing.capturedata.businesslogic.CaptureDataManager;
+import com.epic.cms.system.util.exception.AccessDeniedException;
+import com.epic.cms.system.util.exception.NewLoginSessionException;
+import com.epic.cms.system.util.exception.SesssionExpException;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.variable.MessageVarList;
+import com.epic.cms.system.util.variable.StatusVarList;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author chanuka
+ */
+public class LoadDefaultDataServlet extends HttpServlet {
+
+    private RequestDispatcher rd;
+    private SystemUserManager systemUserManager;
+    private CaptureDataManager captureDataManager;
+    private ApplicationCheckingManager checkingManager;
+    private SessionVarList sessionVarlist;
+    HttpSession sessionObj;
+    private SessionUser sessionUser;
+    private ApplicationAssignBean assignAppBean;
+    private CardApplicationStatusBean appStatusBean = null;
+    private CustomerPersonalBean customerPersonalBean = null;
+    private SupplementaryApplicationBean customerSuplimentoryPersonalBean = null;
+    private CardagainstFDApplicationBean customerCardagainstFDApplicationBean = null;
+
+    private CustomerEmploymentBean employmentBean = null;
+    private List<CardIncomeBean> incomeBeanList = null;
+    private CardExpensesBean expensesBean = null;
+    private List<CardBankDetailsBean> bankDetailsBeanLst = null;
+    private List<DocumentUploadBean> documentDetailsBeanLst = null;
+    private String url = "/LoadCaptureDataServlet";
+    private String url2 = "/LoadSuplimentoryCaptureDataServlet";
+    private String urlCardagainstFD = "/LoadCardagainstFDCaptureDataServlet";
+    private String urlCorporate = "/LoadCorporateCaptureDataServlet";
+    private String urlEstablishment = "/LoadEstablishmentDataServlet";
+    private EstablishmentDetailsBean establishmentDetailsBean = null;
+
+    private List<AssetLiabilityTypeBean> assetsLiabilityTypeList = null;
+    private List<AssetBean> assetsList = null;
+    private List<LiabilityBean> liabilityList = null;
+    private List<EstablishmentLiabilityBean> establishmentLiabilityList = null;
+    private List<EstablishmentAssetsBean> establishmentAssetList = null;
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try {
+
+            sessionObj = request.getSession(false);
+            try {
+                systemUserManager = new SystemUserManager();
+                sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+                sessionUser = sessionVarlist.getCMSSessionUser();
+
+                //check system user is in same session or not
+                try {
+
+                    if (!systemUserManager.validateUserSession(sessionUser.getUserName(), sessionObj.getId())) {
+                        //useer not in same session.
+                        throw new NewLoginSessionException();
+
+                    }
+
+                } catch (NewLoginSessionException nlex) {
+                    //throw lst login close exception
+                    throw new NewLoginSessionException();
+
+                }
+
+            } catch (NullPointerException ex) {
+                //throw session null exception
+                throw new SesssionExpException();
+            }
+
+            String appliactionId = request.getParameter("appliactionid").trim();
+            String cardCategory = sessionVarlist.getCardCategory();
+            String cardCategoryCode = sessionVarlist.getApplicationTypeCode();
+
+            if (request.getParameter("applicationTypeCode") != null) {
+                String applicationTypeCode = request.getParameter("applicationTypeCode").trim();
+                sessionVarlist.setApplicationTypeCode(applicationTypeCode);
+            }
+            sessionVarlist.setApplicationId(appliactionId);
+
+            this.getAllApplicationStatus(appliactionId);
+            String loadTabIndex = "";
+            String selectedTab = "0";
+
+            if (appStatusBean != null) {
+
+                if (appStatusBean.getApplicationStatus().equals(StatusVarList.APP_INITIATE) || appStatusBean.getApplicationStatus().equals(StatusVarList.APP_PROCESS)) {
+
+                    IdBean idbean = new IdBean();
+                    idbean = this.getIdentifyDetails(appliactionId);
+
+                    if (cardCategory.equals("Supplementary")) {
+
+                        if (appStatusBean.getTableOne().equals("1")) {
+                            this.getAllDetailsSuplimentoryCustomer(appliactionId);
+                            request.setAttribute("personalBean", customerSuplimentoryPersonalBean);
+                            sessionVarlist.setSuplimentoryPersonalBean(customerSuplimentoryPersonalBean);
+                            selectedTab = "1";
+
+                        } else {
+                            loadTabIndex = "0";
+                            customerSuplimentoryPersonalBean = new SupplementaryApplicationBean();
+                            customerSuplimentoryPersonalBean.setIdentificationType(idbean.getIdType());
+                            customerSuplimentoryPersonalBean.setIdentificationNumber(idbean.getIdNumber());
+                            request.setAttribute("personalBean", customerSuplimentoryPersonalBean);
+                        }
+
+                        if (appStatusBean.getTableFive().equals("1")) {
+                            this.getAllDocumentDetails(appliactionId);
+                            sessionVarlist.setSessionDocumentList(documentDetailsBeanLst);
+                            selectedTab = "2";
+
+                        } else {
+                            sessionVarlist.setSessionDocumentList(new ArrayList<DocumentUploadBean>());
+                            loadTabIndex = loadTabIndex + "," + "1";
+                        }
+                        if (appStatusBean.getTableSix().equals("1")) {
+                        } else {
+
+                            loadTabIndex = loadTabIndex + "," + "2";
+                        }
+
+                        request.setAttribute("loadTabIndex", loadTabIndex);
+                        request.setAttribute("selectedtab", selectedTab);
+
+                        rd = getServletContext().getRequestDispatcher(url2);
+
+                    }
+
+                    if (cardCategory.equals("Main")) {
+
+                        if (appStatusBean.getTableOne().equals("1")) {
+                            this.getAllDetailsCustomer(appliactionId);
+                            request.setAttribute("personalBean", customerPersonalBean);
+                            sessionVarlist.setPersonalBean(customerPersonalBean);
+                            selectedTab = "1";
+
+                        } else {
+                            loadTabIndex = "0";
+                            customerPersonalBean = new CustomerPersonalBean();
+                            customerPersonalBean.setIdentificationType(idbean.getIdType());
+                            customerPersonalBean.setIdentificationNumber(idbean.getIdNumber());
+                            customerPersonalBean.setPassportExpdate(idbean.getExpDate());
+                            request.setAttribute("personalBean", customerPersonalBean);
+                        }
+                        if (appStatusBean.getTableTwo().equals("1")) {
+                            this.getAllEmpDetails(appliactionId);
+                            request.setAttribute("employmentBean", employmentBean);
+                            sessionVarlist.setEmploymentBean(employmentBean);
+                            selectedTab = "2";
+                        } else {
+                            loadTabIndex = loadTabIndex + "," + "1";
+                        }
+                        if (appStatusBean.getTableThree().equals("1")) {
+                            this.getAllIncomeDetails(appliactionId);
+                            this.getAllExpenseDetails(appliactionId);
+                            request.setAttribute("expenseBean", expensesBean);
+
+                            sessionVarlist.setExpensesBean(expensesBean);
+                            sessionVarlist.setSessionIncomeList(incomeBeanList);
+                            int sum = 0;
+                            for (int i = 0; i < incomeBeanList.size(); i++) {
+                                sum = sum + Integer.parseInt((incomeBeanList.get(i).getAmount().toString()));
+
+                            }
+                            sessionVarlist.setSumOfIncome(sum);
+                            selectedTab = "3";
+
+                        } else {
+                            loadTabIndex = loadTabIndex + "," + "2";
+                        }
+                        if (appStatusBean.getTableFore().equals("1")) {
+                            this.getAllBankDetails(appliactionId);
+                            sessionVarlist.setSessionBankDetailList(bankDetailsBeanLst);
+                            selectedTab = "4";
+                        } else {
+                            sessionVarlist.setSessionBankDetailList(new ArrayList<CardBankDetailsBean>());
+                            loadTabIndex = loadTabIndex + "," + "3";
+                        }
+                        if (appStatusBean.getTableFive().equals("1")) {
+                            this.getAllDocumentDetails(appliactionId);
+                            sessionVarlist.setSessionDocumentList(documentDetailsBeanLst);
+                            selectedTab = "5";
+
+                        } else {
+                            sessionVarlist.setSessionDocumentList(new ArrayList<DocumentUploadBean>());
+                            loadTabIndex = loadTabIndex + "," + "4";
+                        }
+                        if (appStatusBean.getTableSix().equals("1")) {
+                        } else {
+
+                            loadTabIndex = loadTabIndex + "," + "5";
+                        }
+
+                        request.setAttribute("loadTabIndex", loadTabIndex);
+                        request.setAttribute("selectedtab", selectedTab);
+
+                        rd = getServletContext().getRequestDispatcher(url);
+
+                    }
+                    if (cardCategoryCode.equals("C")) {
+
+                        if (appStatusBean.getTableOne().equals("1")) {
+                            this.getAllDetailsCustomer(appliactionId);
+                            request.setAttribute("personalBean", customerPersonalBean);
+                            sessionVarlist.setPersonalBean(customerPersonalBean);
+                            selectedTab = "1";
+
+                        } else {
+                            loadTabIndex = "0";
+                            customerPersonalBean = new CustomerPersonalBean();
+                            customerPersonalBean.setIdentificationType(idbean.getIdType());
+                            customerPersonalBean.setIdentificationNumber(idbean.getIdNumber());
+                            customerPersonalBean.setPassportExpdate(idbean.getExpDate());
+                            request.setAttribute("personalBean", customerPersonalBean);
+                        }
+
+                        //---------Document Details----
+                        if (appStatusBean.getTableFive().equals("1")) {
+                            this.getAllDocumentDetails(appliactionId);
+                            sessionVarlist.setSessionDocumentList(documentDetailsBeanLst);
+                            selectedTab = "2";
+
+                        } else {
+                            sessionVarlist.setSessionDocumentList(new ArrayList<DocumentUploadBean>());
+                            loadTabIndex = loadTabIndex + "," + "1";
+                        }
+                        //----Signature------
+                        if (appStatusBean.getTableSix().equals("1")) {
+
+                        } else {
+                            loadTabIndex = loadTabIndex + "," + "2";
+                        }
+
+                        request.setAttribute("loadTabIndex", loadTabIndex);
+                        request.setAttribute("selectedtab", selectedTab);
+                        rd = getServletContext().getRequestDispatcher(urlCorporate);
+                    }
+
+                    if (cardCategoryCode.equals("F")) {
+
+                        if (appStatusBean.getTableOne().equals("1")) {
+                            this.getAllDetailsCustomer(appliactionId);
+                            request.setAttribute("personalBean", customerPersonalBean);
+                            sessionVarlist.setPersonalBean(customerPersonalBean);
+                            selectedTab = "1";
+
+                        } else {
+                            loadTabIndex = "0";
+                            customerPersonalBean = new CustomerPersonalBean();
+                            customerPersonalBean.setIdentificationType(idbean.getIdType());
+                            customerPersonalBean.setIdentificationNumber(idbean.getIdNumber());
+                            customerPersonalBean.setPassportExpdate(idbean.getExpDate());
+                            request.setAttribute("personalBean", customerPersonalBean);
+                        }
+
+                        //----------Bank Details
+                        if (appStatusBean.getTableFore().equals("1")) {
+                            this.getAllBankDetails(appliactionId);
+                            sessionVarlist.setSessionBankDetailList(bankDetailsBeanLst);
+                            selectedTab = "2";
+                        } else {
+                            sessionVarlist.setSessionBankDetailList(new ArrayList<CardBankDetailsBean>());
+                            loadTabIndex = loadTabIndex + "," + "1";
+                        }
+                        //---------Document Details----
+                        if (appStatusBean.getTableFive().equals("1")) {
+                            this.getAllDocumentDetails(appliactionId);
+                            sessionVarlist.setSessionDocumentList(documentDetailsBeanLst);
+                            selectedTab = "3";
+
+                        } else {
+                            sessionVarlist.setSessionDocumentList(new ArrayList<DocumentUploadBean>());
+                            loadTabIndex = loadTabIndex + "," + "2";
+                        }
+                        //----Signature------
+                        if (appStatusBean.getTableSix().equals("1")) {
+
+                        } else {
+                            loadTabIndex = loadTabIndex + "," + "3";
+                        }
+
+                        request.setAttribute("loadTabIndex", loadTabIndex);
+                        request.setAttribute("selectedtab", selectedTab);
+                        rd = getServletContext().getRequestDispatcher(urlCardagainstFD);
+                    }
+
+                    if (cardCategoryCode.equals("E")) {
+
+                        if (appStatusBean.getTableOne().equals("1")) {
+                            this.getAllDetailsEstablishment(appliactionId);
+                            request.setAttribute("establishmentDetailsBean", establishmentDetailsBean);
+                            sessionVarlist.setEstablishmentDetailsBean(establishmentDetailsBean);
+                            selectedTab = "1";
+
+                        } else {
+                            loadTabIndex = "0";
+                            establishmentDetailsBean = new EstablishmentDetailsBean();
+                            establishmentDetailsBean.setIdentificationType(idbean.getIdType());
+                            establishmentDetailsBean.setIdentificationNumber(idbean.getIdNumber());
+                            request.setAttribute("establishmentDetailsBean", establishmentDetailsBean);
+                        }
+
+                        //---------Assets and Liability Details----
+                        if (appStatusBean.getTableTwo().equals("1")) {
+                            
+                            this.getAllAssetAndLiabilityDetails(establishmentDetailsBean.getBusinessRegNumber());
+                            sessionVarlist.setEstablishmentAssetList(establishmentAssetList);
+                            sessionVarlist.setEstablishmentLiabilityList(establishmentLiabilityList);
+                            selectedTab = "2";
+                        } else {
+                            sessionVarlist.setEstablishmentAssetList(new ArrayList<EstablishmentAssetsBean>());
+                            sessionVarlist.setEstablishmentLiabilityList(new ArrayList<EstablishmentLiabilityBean>());
+                            loadTabIndex = loadTabIndex + "," + "1";
+                        }
+
+                        //----------Bank Details
+                        if (appStatusBean.getTableFore().equals("1")) {
+                            this.getAllBankDetails(appliactionId);
+                            sessionVarlist.setSessionBankDetailList(bankDetailsBeanLst);
+                            selectedTab = "3";
+                        } else {
+                            sessionVarlist.setSessionBankDetailList(new ArrayList<CardBankDetailsBean>());
+                            loadTabIndex = loadTabIndex + "," + "2";
+                        }
+                        //---------Document Details----
+                        if (appStatusBean.getTableFive().equals("1")) {
+                            this.getAllDocumentDetails(appliactionId);
+                            sessionVarlist.setSessionDocumentList(documentDetailsBeanLst);
+                            selectedTab = "4";
+
+                        } else {
+                            sessionVarlist.setSessionDocumentList(new ArrayList<DocumentUploadBean>());
+                            loadTabIndex = loadTabIndex + "," + "3";
+                        }
+                        //----Signature------
+                        if (appStatusBean.getTableSix().equals("1")) {
+
+                        } else {
+                            loadTabIndex = loadTabIndex + "," + "4";
+                        }
+
+                        request.setAttribute("loadTabIndex", loadTabIndex);
+                        request.setAttribute("selectedtab", selectedTab);
+                        rd = getServletContext().getRequestDispatcher(urlEstablishment);
+                    }
+
+                } else {
+
+                    request.setAttribute("errorMsg", "This application is not in processing status");
+                    rd = getServletContext().getRequestDispatcher("/LoadUserAssignDataServlet");
+
+                }
+//            this.getAllDocumentDetails(appliactionId);
+
+            } else {
+                request.setAttribute("errorMsg", "This application is not in processing status");
+                rd = getServletContext().getRequestDispatcher("/LoadUserAssignDataServlet");
+
+            }
+
+        } //catch session exception
+        catch (SesssionExpException sex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.SESSION_EXPIRED);
+
+        } catch (NewLoginSessionException nlex) {
+
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.LAST_SESSION_CLOSE);
+
+        } //catch accessdenied exception
+        catch (AccessDeniedException adex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.ACCESS_DENIED_TASK);
+
+        } catch (Exception ex) {
+            request.setAttribute("errorMsg", MessageVarList.ERROR_LOAD_USER_ASSIGN_DEFAULT);
+            rd = request.getRequestDispatcher("/LoadUserAssignDataServlet");
+
+        } finally {
+            rd.forward(request, response);
+            out.close();
+        }
+    }
+
+    private void getAllDetailsCustomer(String appliactionId) throws Exception {
+        try {
+            captureDataManager = new CaptureDataManager();
+            customerPersonalBean = captureDataManager.getAllDetailsCustomer(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getAllDetailsSuplimentoryCustomer(String appliactionId) throws Exception {
+        try {
+            captureDataManager = new CaptureDataManager();
+            customerSuplimentoryPersonalBean = captureDataManager.getAllDetailsSuplimentoryCustomer(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+    private void getAllApplicationStatus(String appliactionId) throws Exception {
+
+        try {
+            captureDataManager = new CaptureDataManager();
+            appStatusBean = captureDataManager.getAllApplicationStatus(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getAllEmpDetails(String appliactionId) throws Exception {
+        try {
+            checkingManager = new ApplicationCheckingManager();
+            employmentBean = checkingManager.getCardEmployementDetails(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getAllIncomeDetails(String appliactionId) throws Exception {
+        try {
+            checkingManager = new ApplicationCheckingManager();
+            incomeBeanList = checkingManager.getCardIncomeDetails(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getAllExpenseDetails(String appliactionId) throws Exception {
+
+        try {
+            checkingManager = new ApplicationCheckingManager();
+            expensesBean = checkingManager.getExpensesDetails(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getAllBankDetails(String appliactionId) throws Exception {
+        try {
+            checkingManager = new ApplicationCheckingManager();
+            bankDetailsBeanLst = checkingManager.getCardBankDetailsDetails(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getAllDocumentDetails(String appliactionId) throws Exception {
+        try {
+            checkingManager = new ApplicationCheckingManager();
+            documentDetailsBeanLst = checkingManager.getCardDocumentDetails(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private IdBean getIdentifyDetails(String appliactionId) throws Exception {
+        IdBean bean = new IdBean();
+        try {
+            captureDataManager = new CaptureDataManager();
+            bean = captureDataManager.getIdentifyDetails(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+        return bean;
+    }
+
+    public EstablishmentDetailsBean getEstablishmentDetailsBean() {
+        return establishmentDetailsBean;
+    }
+
+    public void setEstablishmentDetailsBean(EstablishmentDetailsBean establishmentDetailsBean) {
+        this.establishmentDetailsBean = establishmentDetailsBean;
+    }
+
+    private void getAllDetailsEstablishment(String appliactionId) throws Exception {
+        try {
+            captureDataManager = new CaptureDataManager();
+            establishmentDetailsBean = captureDataManager.getAllDetailsEstablishment(appliactionId);
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    public List<AssetLiabilityTypeBean> getAssetsLiabilityTypeList() {
+        return assetsLiabilityTypeList;
+    }
+
+    public void setAssetsLiabilityTypeList(List<AssetLiabilityTypeBean> assetsLiabilityTypeList) {
+        this.assetsLiabilityTypeList = assetsLiabilityTypeList;
+    }
+
+    public List<AssetBean> getAssetsList() {
+        return assetsList;
+    }
+
+    public void setAssetsList(List<AssetBean> assetsList) {
+        this.assetsList = assetsList;
+    }
+
+    public List<LiabilityBean> getLiabilityList() {
+        return liabilityList;
+    }
+
+    public void setLiabilityList(List<LiabilityBean> liabilityList) {
+        this.liabilityList = liabilityList;
+    }
+
+    public List<EstablishmentLiabilityBean> getEstablishmentLiabilityList() {
+        return establishmentLiabilityList;
+    }
+
+    public void setEstablishmentLiabilityList(List<EstablishmentLiabilityBean> establishmentLiabilityList) {
+        this.establishmentLiabilityList = establishmentLiabilityList;
+    }
+
+    public List<EstablishmentAssetsBean> getEstablishmentAssetList() {
+        return establishmentAssetList;
+    }
+
+    public void setEstablishmentAssetList(List<EstablishmentAssetsBean> establishmentAssetList) {
+        this.establishmentAssetList = establishmentAssetList;
+    }
+    
+    
+    
+    private void getAllAssetAndLiabilityDetails(String businessRegNo) throws Exception {
+        try {
+            checkingManager = new ApplicationCheckingManager();
+            establishmentAssetList = checkingManager.getAllAssetDetails(businessRegNo);
+            establishmentLiabilityList = checkingManager.getAllLiabilityDetails(businessRegNo);
+            //establishmentAssetList = new ArrayList<EstablishmentAssetsBean>();
+            //establishmentLiabilityList =  new ArrayList<EstablishmentLiabilityBean>();
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+}

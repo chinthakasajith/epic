@@ -1,0 +1,574 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.admin.controlpanel.sysusermgt.servlet;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.ApplicationModuleBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.PageBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SectionBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.TaskBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.UserRoleBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.ApplicationModuleMgtManager;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemAuditManager;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.application.common.bean.StatusBean;
+import com.epic.cms.system.util.datatable.DataTableRequestParam;
+import com.epic.cms.system.util.datatable.DataTablesParamUtility;
+import com.epic.cms.system.util.json.JSONArray;
+import com.epic.cms.system.util.json.JSONObject;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.validate.UserInputValidator;
+import com.epic.cms.system.util.variable.MessageVarList;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author upul
+ */
+public class ProcessSearchSystemAuditServlet extends HttpServlet {
+
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    private SystemAuditManager manager;
+    private SystemAuditBean sysAuditInfo;
+    private SystemAuditBean searchBean;
+    private String fromDate;
+    private String toDate;
+    private List<SystemAuditBean> searchList;
+    private SessionVarList sessionVarlist;
+    private SessionUser sessionUser;
+    private String username;
+    private List<PageBean> pageList;
+    private List<SectionBean> sectionList;
+    private List<TaskBean> taskList;
+    private List<UserRoleBean> userRoleList;
+    private RequestDispatcher rd;
+    HttpSession sessionObj = null;
+    private List<StatusBean> statusList;
+    private ApplicationModuleMgtManager applicationModuleMgtManager = null;
+    private List<ApplicationModuleBean> applicationLst;
+    private List<SystemAuditBean> auditList;
+    private List<SystemAuditBean> printerlist;
+    private SystemUserManager systemUserManager = null;
+    private SystemAuditManager systemAuditManager = null;
+    private String errorMsg = null;
+    private String url = "/administrator/controlpanel/systemusermgt/systemaudittracehome.jsp";
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try {
+            sessionObj = request.getSession(false);
+            sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+            //columns of the table view
+            String[] cols = {"lastUpdatedTime", "systemAuditId", "userRoleCode", "userName", "description", "applicationCode",
+                "sectionCode", "pageCode", "taskCode", "remarks", "ip"};
+
+            /**
+             * private int systemAuditId;
+            private String userRoleCode;
+            private String userName;
+            private String applicationCode;
+            private String description;
+            private String sectionCode;
+            private String pageCode;
+            private String taskCode;
+            private String remarks;
+            private String ip;
+            private String uniqueId;
+            private String fieldName;
+            private String oldValue;
+            private String newValue;
+            private String statusCode;
+            private String lastUpdateduser;
+            private Timestamp lastUpdatedTime;
+            private Timestamp createdTime;
+             */
+            final DataTableRequestParam param = DataTablesParamUtility.getParam(request);
+            final String sEcho = param.sEcho;
+            int iTotalRecords = 0; // total number of records (unfiltered)
+            int iTotalDisplayRecords = 0;//value will be set when code filters data by keyword
+            JSONArray data = new JSONArray(); //data that will be shown in the table
+
+            systemAuditManager = new SystemAuditManager();
+            List<String> sArray = new ArrayList<String>();
+            // SQL binding parameters
+            List<Object> sqlParams = new ArrayList<Object>();
+
+            // Global Search
+            String searchSQL = "";
+            String globalSearch = " (a.LASTUPDATEDTIME LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.SYSTEMAUDITID LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.USERROLECODE LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.USERNAME LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.DESCRIPTION LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.APPLICATIONCODE LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.SECTIONCODE LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.PAGECODE LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.TASKCODE LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.REMARKS LIKE '%" + param.sSearchKeyword + "%'"
+                    + " OR a.IP LIKE '%" + param.sSearchKeyword + "%')";
+
+            if (!param.sSearchKeyword.equals("") && validateSearchValue(param.sSearchKeyword)) {
+                searchSQL = globalSearch;
+            } else {
+                searchSQL = "1=1";
+                sqlParams.clear();
+            }
+
+//            searchSQL = "1=1";
+//            sqlParams.clear();
+
+            //------------------------set user input to bean----------------------------------------------
+            if (request.getAttribute("isBack") == null) {
+                sysAuditInfo = new SystemAuditBean();
+                sysAuditInfo.setUserRoleCode(request.getParameter("userrole"));
+                sysAuditInfo.setDescription(request.getParameter("description"));
+                sysAuditInfo.setSectionCode(request.getParameter("section"));
+                sysAuditInfo.setPageCode(request.getParameter("page"));
+                sysAuditInfo.setTaskCode(request.getParameter("task"));
+                sysAuditInfo.setIp(request.getParameter("ip"));
+                sysAuditInfo.setRemarks(request.getParameter("remarks"));
+                sysAuditInfo.setStatusCode(request.getParameter("status"));
+                sysAuditInfo.setUserName(request.getParameter("username"));
+                sysAuditInfo.setApplicationCode(request.getParameter("application"));
+                sysAuditInfo.setLastUpdateduser("");
+                fromDate = request.getParameter("fromdate");
+                toDate = request.getParameter("todate");
+
+                sessionVarlist.setAuditBean(sysAuditInfo);
+            } else if (request.getAttribute("isBack").equals("yes")) {
+                sysAuditInfo = sessionVarlist.getAuditBean();
+
+            }
+            //----------------------------------------------------------------------------------------------
+            if (sysAuditInfo.getSystemAuditId() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.SYSTEMAUDITID = " + sysAuditInfo.getSystemAuditId();
+            }
+            if (!sysAuditInfo.getUserRoleCode().contentEquals("") || sysAuditInfo.getUserRoleCode().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.USERROLECODE = '" + sysAuditInfo.getUserRoleCode() + "'";
+            }
+
+            if (!sysAuditInfo.getUserName().contentEquals("") && !sysAuditInfo.getUserName().contains("'") && !sysAuditInfo.getUserName().contains("\"")&& sysAuditInfo.getUserName().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.USERNAME = '" + sysAuditInfo.getUserName() + "'";
+            }
+
+
+            if (!sysAuditInfo.getDescription().contentEquals("") && !sysAuditInfo.getDescription().contains("'") && !sysAuditInfo.getDescription().contains("\"")&& sysAuditInfo.getDescription().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.DESCRIPTION LIKE  '%" + sysAuditInfo.getDescription() + "%'";
+            }
+
+            if (!sysAuditInfo.getApplicationCode().contentEquals("") || sysAuditInfo.getApplicationCode().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.APPLICATIONCODE ='" + sysAuditInfo.getApplicationCode() + "'";
+            }
+
+
+
+            if (!sysAuditInfo.getSectionCode().contentEquals("") || sysAuditInfo.getSectionCode().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.SECTIONCODE ='" + sysAuditInfo.getSectionCode() + "'";
+            }
+
+            if (!sysAuditInfo.getPageCode().contentEquals("") || sysAuditInfo.getPageCode().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.PAGECODE ='" + sysAuditInfo.getPageCode() + "'";
+            }
+
+            if (!sysAuditInfo.getTaskCode().contentEquals("") || sysAuditInfo.getTaskCode().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.TASKCODE ='" + sysAuditInfo.getTaskCode() + "'";
+            }
+
+
+            if (!sysAuditInfo.getRemarks().contentEquals("") && !sysAuditInfo.getRemarks().contains("'") && !sysAuditInfo.getRemarks().contains("\"")&& sysAuditInfo.getRemarks().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.REMARKS LIKE  '%" + sysAuditInfo.getRemarks() + "%'";
+            }
+
+
+            if (!sysAuditInfo.getIp().contentEquals("") && !sysAuditInfo.getRemarks().contains("'") && !sysAuditInfo.getRemarks().contains("\"")&& sysAuditInfo.getIp().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.IP LIKE '%" + sysAuditInfo.getIp() + "%'";
+            }
+
+
+            if (!sysAuditInfo.getLastUpdateduser().contentEquals("") || sysAuditInfo.getLastUpdateduser().length() > 0) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.LASTUPDATEDUSER ='" + sysAuditInfo.getLastUpdateduser() + "'";
+            }
+
+
+            if (!fromDate.contentEquals("") && !toDate.contentEquals("")) {
+                if (!searchSQL.equals("")) {
+                    searchSQL += " AND ";
+                }
+                searchSQL += "a.LASTUPDATEDTIME >= to_Date('" + this.stringTodate(fromDate) + "','yy-mm-dd') AND a.LASTUPDATEDTIME <= to_Date('" + this.stringTodate(toDate) + "','yy-mm-dd')";
+            } else {
+
+                if (!fromDate.contentEquals("")) {
+                    if (!searchSQL.equals("")) {
+                        searchSQL += " AND ";
+                    }
+                    searchSQL += "a.LASTUPDATEDTIME >= to_Date('" + this.stringTodate(fromDate) + "','yy-mm-dd')";
+                }
+                if (!toDate.contentEquals("")) {
+                    if (!searchSQL.equals("")) {
+                        searchSQL += " AND ";
+                    }
+                    searchSQL += "a.LASTUPDATEDTIME <= to_Date('" + this.stringTodate(toDate) + "','yy-mm-dd')";
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------
+            if (param.iDisplayStart < 0) {
+                param.iDisplayStart = 0;
+            }
+
+            if (param.iDisplayLength < 10 || param.iDisplayLength > 100) {
+                param.iDisplayLength = 10;
+            }
+
+            // Ordering and limiting for pagination
+            searchSQL += " ORDER BY " + cols[param.iSortCol[0]] + " " + param.sSortDir[0];
+
+            iTotalRecords = systemAuditManager.getCount(searchSQL);
+            auditList = new ArrayList<SystemAuditBean>();
+            try {
+                int end = param.iDisplayLength + param.iDisplayStart;
+                auditList = systemAuditManager.getAuditDetails(searchSQL, param.iDisplayStart, end);
+                if (param.sSearchKeyword != "") {
+                    iTotalDisplayRecords = iTotalRecords;
+                } else {
+                    iTotalDisplayRecords = iTotalRecords;
+                }
+            } catch (Exception e) {//if calling db gives exception
+                iTotalDisplayRecords = iTotalRecords;
+            }
+
+            JSONObject jsonResponse = new JSONObject();
+
+            jsonResponse.put("sEcho", sEcho);
+            jsonResponse.put("iTotalRecords", iTotalRecords);
+            jsonResponse.put("iTotalDisplayRecords", iTotalDisplayRecords);
+
+            JSONArray row = new JSONArray();
+            for (SystemAuditBean t : auditList) {
+
+                JSONObject object = new JSONObject();
+
+                object.put("userRoleCode", t.getUserRoleCode());
+                object.put("description", t.getDescription());
+                object.put("sectionCode", t.getSectionCode());
+                object.put("pageCode", t.getPageCode());
+                object.put("taskCode", t.getTaskCode());
+                object.put("ip", t.getIp());
+                object.put("lastUpdateduser", t.getLastUpdateduser());
+                object.put("lastUpdatedTime", t.getLastUpdatedTime());
+                object.put("view", "<a href='#' onclick=invokeView('" + t.getSystemAuditId() + "')>View</a>");
+
+                row.put(object);
+
+            }
+            jsonResponse.put("aaData", row);
+            response.setContentType("application/json");
+            response.getWriter().print(jsonResponse.toString());
+
+
+
+            //----------------------------------------------------------------------------------------------
+
+
+            //////////////////////////////////////////////////////////////////
+
+            //when throw an sql exception
+        } catch (Exception ex) {
+            rd = getServletContext().getRequestDispatcher(url);
+            rd.forward(request, response);
+
+        } finally {
+            out.close();
+        }
+    }
+
+    public boolean validateUserInput(SystemAuditBean sysAuditInfo) throws Exception {
+        boolean isValidate = true;
+
+        //////validate user Role code
+
+        try {
+
+            if (!UserInputValidator.isAlphaNumeric(sysAuditInfo.getUserName())) {
+                isValidate = false;
+
+                errorMsg = MessageVarList.INVALID_SEARCH_LETTERS;
+
+            } else if (!UserInputValidator.isAlphaNumeric(sysAuditInfo.getDescription())) {
+                isValidate = false;
+
+                errorMsg = MessageVarList.INVALID_SEARCH_LETTERS;
+
+            } else if (!UserInputValidator.isAlphaNumeric(sysAuditInfo.getRemarks())) {
+                isValidate = false;
+
+                errorMsg = MessageVarList.INVALID_SEARCH_LETTERS;
+
+            } else if (!sysAuditInfo.getIp().contentEquals("") && !UserInputValidator.isCorrectIp(sysAuditInfo.getIp())) {
+                isValidate = false;
+
+                errorMsg = MessageVarList.INVALID_SEARCH_LETTERS;
+
+            }
+
+        } catch (Exception ex) {
+            isValidate = false;
+            throw ex;
+        }
+        return isValidate;
+    }
+
+    private void setValuesToBean(HttpServletRequest request) throws Exception {
+        try {
+            sysAuditInfo = new SystemAuditBean();
+            sysAuditInfo.setUserRoleCode(request.getParameter("userrole"));
+            sysAuditInfo.setDescription(request.getParameter("description"));
+            sysAuditInfo.setSectionCode(request.getParameter("section"));
+            sysAuditInfo.setPageCode(request.getParameter("page"));
+            sysAuditInfo.setTaskCode(request.getParameter("task"));
+
+            sysAuditInfo.setIp(request.getParameter("ip"));
+            sysAuditInfo.setRemarks(request.getParameter("remarks"));
+
+            sysAuditInfo.setStatusCode(request.getParameter("status"));
+            sysAuditInfo.setUserName(request.getParameter("username"));
+            sysAuditInfo.setApplicationCode(request.getParameter("application"));
+
+            /*for (int i = 0; i < statusList.size(); i++) {
+            if (request.getParameter("status").equals("")) {
+            System.out.println(request.getParameter("status"));
+            sysAuditInfo.setStatusCode(request.getParameter("status"));
+            } else if (pageList.get(i).getDescription().equals(request.getParameter("status"))) {
+            sysAuditInfo.setStatusCode(request.getParameter("status"));
+            System.out.println(request.getParameter("status"));
+            }
+            }*/
+
+
+            sysAuditInfo.setLastUpdateduser("");
+            fromDate = request.getParameter("fromdate");
+            toDate = request.getParameter("todate");
+        } catch (Exception ex) {
+            throw ex;
+
+        }
+    }
+
+    private void getUserRoleList() throws Exception {
+
+        try {
+
+            userRoleList = systemAuditManager.getAllUserRole();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getsectionList() throws Exception {
+        try {
+
+            sectionList = systemAuditManager.getAllSection();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getPagelist() throws Exception {
+        try {
+
+            pageList = systemAuditManager.getAllPage();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void getTaskList() throws Exception {
+        try {
+
+            taskList = systemAuditManager.getAllTask();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    /**
+     * getApplicationList
+     * @throws Exception 
+     */
+    private void getApplicationList() throws Exception {
+        try {
+            applicationModuleMgtManager = new ApplicationModuleMgtManager();
+            applicationLst = applicationModuleMgtManager.getAllApplicationList();
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void searchRECSystemAudit() throws Exception {
+
+        try {
+            int result = -1;
+            manager = new SystemAuditManager();
+            searchList = manager.getAllSearchList(sysAuditInfo, fromDate, toDate);
+
+
+
+        } catch (Exception ex) {
+            throw ex;
+
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////    
+    /**
+     * isValidTaskByUser
+     * @param userTaskList
+     * @param task
+     * @return
+     * @throws Exception 
+     */
+    private boolean isValidTaskByUser(List<String> userTaskList, String task) throws Exception {
+        boolean isValidTask = false;
+        try {
+
+            for (String usertask : userTaskList) {
+
+                if (task.equals(usertask)) {
+                    isValidTask = true;
+                }
+
+
+            }
+            return isValidTask;
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private String stringTodate(String date) throws ParseException {
+        String dateString = date;
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+
+        Date convertedDate = dateFormat.parse(dateString);
+
+        return (dateFormat.format(convertedDate));
+    }
+    ////////////////////////////////////////////////////////////////////////////   
+
+    /**
+     * validate user input value
+     * @param sParam
+     * @return
+     * @throws Exception 
+     */
+    private boolean validateSearchValue(String sParam) {
+        boolean flag = true;
+        try {
+
+            if (!UserInputValidator.isCorrectString(sParam)) {
+                flag = false;
+            }
+
+            return flag;
+
+        } catch (Exception e) {
+            flag = false;
+            return flag;
+        }
+    }
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

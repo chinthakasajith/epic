@@ -1,0 +1,164 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.camm.applicationproccessing.capturedata.bean;
+
+/**
+ *
+ * @author janaka_h
+ */
+public class CardBankDetailsBean {
+    
+    
+    private String applicationid;
+    private String bankName;
+    private String bankCode;
+    private String bankNameDes;
+    private String branchName;
+    private String branchCode;
+    private String branchNameDes;
+    private String accountType;
+    private String accountNumber;
+    private String accountSince;
+    private String sinceYear;
+    private String sinceMonth;
+    //automatic settlement param
+    private String isAutoSettle;
+    private String configBankCode;
+
+    public String getConfigBankCode() {
+        return configBankCode;
+    }
+
+    public void setConfigBankCode(String configBankCode) {
+        this.configBankCode = configBankCode;
+    }
+    private String autoSettleAccNo;
+
+    public String getAutoSettleAccNo() {
+        return autoSettleAccNo;
+    }
+
+    public void setAutoSettleAccNo(String autoSettleAccNo) {
+        this.autoSettleAccNo = autoSettleAccNo;
+    }
+
+    public String getIsAutoSettle() {
+        return isAutoSettle;
+    }
+
+    public void setIsAutoSettle(String isAutoSettle) {
+        this.isAutoSettle = isAutoSettle;
+    }
+
+    public String getAutoSettlePerValue() {
+        return autoSettlePerValue;
+    }
+
+    public void setAutoSettlePerValue(String autoSettlePerValue) {
+        this.autoSettlePerValue = autoSettlePerValue;
+    }
+    private String autoSettlePerValue;
+
+    public String getBranchCode() {
+        return branchCode;
+    }
+
+    public void setBranchCode(String branchCode) {
+        this.branchCode = branchCode;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
+
+    public String getApplicationid() {
+        return applicationid;
+    }
+
+    public void setApplicationid(String applicationid) {
+        this.applicationid = applicationid;
+    }
+    
+    
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    public String getAccountSince() {
+        return accountSince;
+    }
+
+    public void setAccountSince(String accountSince) {
+        this.accountSince = accountSince;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
+    }
+
+    public String getSinceMonth() {
+        return sinceMonth;
+    }
+
+    public void setSinceMonth(String sinceMonth) {
+        this.sinceMonth = sinceMonth;
+    }
+
+    public String getSinceYear() {
+        return sinceYear;
+    }
+
+    public void setSinceYear(String sinceYear) {
+        this.sinceYear = sinceYear;
+    }
+
+    public String getBankNameDes() {
+        return bankNameDes;
+    }
+
+    public void setBankNameDes(String bankNameDes) {
+        this.bankNameDes = bankNameDes;
+    }
+
+    public String getBranchNameDes() {
+        return branchNameDes;
+    }
+
+    public void setBranchNameDes(String branchNameDes) {
+        this.branchNameDes = branchNameDes;
+    }
+    
+    
+    
+    
+}

@@ -1,0 +1,71 @@
+
+<html>
+
+<style type="text/css">
+<!--
+#sis_Div {
+	height: 400px;
+	width: 600px;
+	margin-right: auto;
+	margin-left: auto;
+	border: thin solid #2c2c2c;
+}
+
+#sis_event{
+
+}
+-->
+</style>
+
+<script type="text/javascript">
+hideStep('#msgCID1');
+hideStep('#msgCID2');
+
+
+
+</script>
+
+
+<img src="images/Close.png" onClick="loadContainer('treeItems/CID_CIO_Notified.html');"/>
+<b>SIS Officer Verification </b>
+<div id="CID_div">
+<div id="sis_Div">Applicant Details </div>
+
+<fieldset>
+<legend>SIS officer Verification in Action </legend>
+<table align="center" width="600">
+<tr>
+  <td>Remark</td>
+  <td><textarea name="textarea" cols="90"></textarea></td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="checkbox" name="checkbox" value="checkbox" />
+    Verified validity</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="checkbox" name="checkbox2" value="checkbox" />
+    Verified authenticity </td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+  <td><input type="submit" name="Submit" value="Clear" onClick="hideStep('#CID_div');showStep('#msgCID1');"/>
+    <input type="submit" name="Submit2" value="Direct to CIO Notify" onClick="hideStep('#CID_div');showStep('#msgCID2');"/></td>
+</tr>
+<tr>
+ <td width="73">&nbsp;</td>
+ <td width="515"><p>&nbsp;</p>   </td> 
+</tr>
+</table>
+
+</fieldset>
+
+</div>
+
+<p id="msgCID1" class="msgText">Readmission Case Cleared </p>
+<p id="msgCID2" class="msgText">Readmission Case Redirect to CIO </p>
+
+
+
+</html>

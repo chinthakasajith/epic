@@ -1,0 +1,111 @@
+/* 
+    Document   : common
+    Created on : Jul 13, 2010, 2:28:27 PM
+    Author     : amila_p
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+table.acstable {
+    border-color: #C3D9FF;
+    width: 100%;
+    height: 100%;
+    min-width:800px;
+    min-height:600px;
+
+}
+
+td.acstable-menubar {
+    width: 225px;
+    height: 400px;
+    vertical-align: top;
+    background-color: #EEEEEE;
+    margin-right: 2px;
+    margin-left: 2px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+
+}
+
+td.acstable-subheader {
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    color: #EEEEEE;
+    background-color: #333333;
+    height: 20px;
+
+}
+
+td.acstable-header {
+    height: 72px;
+}
+
+td.acstable-body {
+    vertical-align: top;
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+td.acstable-footer {
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    color: #EEEEEE;
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: #333333;
+}
+
+input{
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    border: 1px solid #C3D9FF;
+}
+input.inputfield{
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+input.inputfield-mandatory{
+    font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    background: #ffc;
+}
+input.inputfield-Description{
+    width: 300px;
+}
+
+input.inputfield-Description-mandatory{
+    width: 300px;
+    background: #ffc;
+}
+input.button-positive{
+    background: #C3D9FF;
+}
+a:link {color:#EEEEEE;}      /* unvisited link */
+a:visited {color:#BBBBBB;}  /* visited link */
+a:hover {color:#DDDDDD;}  /* mouse over link */
+a:active {color:#CCCCCC;}  /* selected link */
+.title2 {
+	font-family	: Verdana, Arial, Helvetica, sans-serif;
+	font-size	: 11px;
+	font-weight	: bold;
+	color		: #613027;
+}
+.title3 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-style: normal;
+	font-variant: normal;
+	color:#350035;/*themecolour1;*/
+	margin-left: 20px;
+	font-weight: bold;
+	text-transform: uppercase;
+}

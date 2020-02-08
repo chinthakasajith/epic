@@ -1,0 +1,460 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.cpmm.requestconfirmation.persistance;
+
+import com.epic.cms.cpmm.requestconfirmation.bean.RequestConfirmationBean;
+import com.epic.cms.system.util.datetime.SystemDateTime;
+import com.epic.cms.system.util.variable.StatusVarList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ *
+ * @author nisansala
+ */
+public class RequestConfirmationPersistance {
+
+    ResultSet rs = null;
+    List<RequestConfirmationBean> requestList = null;
+
+    public HashMap<String, String> getApproveStatus(Connection con) throws Exception {
+        HashMap<String, String> approveStatus = new HashMap<String, String>();
+
+        PreparedStatement ps = null;
+
+        try {
+            ps = con.prepareStatement("SELECT S.STATUSCODE,S.DESCRIPTION FROM STATUS S "
+                    + "WHERE S.STATUSCATEGORY = 'COMN'");
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                approveStatus.put(rs.getString("STATUSCODE"), rs.getString("DESCRIPTION"));
+
+            }
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+
+        return approveStatus;
+    }
+
+    public List<RequestConfirmationBean> searchRequests(Connection con, RequestConfirmationBean inputBean) throws SQLException, Exception {
+        //hold the statement to be executed
+        PreparedStatement ps = null;
+        String defaultQuery = null;
+
+        try {
+//            defaultQuery = "SELECT CR.CARDNUMBER,CR.PRIORITYLEVEL,PL.DESCRIPTION AS PRIO_DES,CR.REMARKS,CR.STATUS,S.DESCRIPTION AS APPROVESTATUS,CR.CALLLOGID,CR.APPROVEDUSER,"
+//                    + "CR.REQUESTEDUSER,CR.REQUESTREASONCODE"
+//                    + " FROM CARDREQUEST CR,STATUS S,PRIORITYLEVEL PL "
+//                    + "WHERE S.STATUSCODE= CR.STATUS AND CR.STATUS=? AND CR.PRIORITYLEVEL=PL.PRIORITYLEVELCODE and ";
+
+            defaultQuery = "SELECT CR.CARDNUMBER,CR.PRIORITYLEVEL,PL.DESCRIPTION AS PRIO_DES,CR.REMARKS,CR.STATUS,S.DESCRIPTION AS APPROVESTATUS,CR.CALLLOGID,CR.APPROVEDUSER,"
+                    + "CR.REQUESTEDUSER,CR.REQUESTREASONCODE"
+                    + " FROM CARDREQUEST CR,STATUS S,PRIORITYLEVEL PL, userlevel ul1, userlevel ul2, userrole ur1, userrole ur2, systemuser su1,systemuser su2 "
+                    + "WHERE S.STATUSCODE= CR.STATUS AND CR.STATUS=? AND CR.PRIORITYLEVEL=PL.PRIORITYLEVELCODE "
+                    + "and cr.requesteduser != ? and ul1.levelid = ur1.levelid and ur1.userrole = su1.userrolecode and su1.username = cr.requesteduser "
+                    + "and ul2.levelid = ur2.levelid and ur2.userrole = su2.userrolecode and su2.username = ? "
+                    + "and (ul1.levelid <= ul2.levelid or ur2.userrole = su1.dualauthuserrole) ";
+
+            String condition = "";
+
+            if (!inputBean.getCardNo().contentEquals("") || inputBean.getCardNo().length() > 0) {
+                if (!condition.equals("")) {
+                    condition += " AND ";
+                }
+                condition += "CR.CARDNUMBER = '" + inputBean.getCardNo() + "'";
+            }
+            if (!inputBean.getPriorityLevel().contentEquals("") || inputBean.getPriorityLevel().length() > 0) {
+                if (!condition.equals("")) {
+                    condition += " AND ";
+                }
+                condition += "CR.PRIORITYLEVEL = '" + inputBean.getPriorityLevel() + "'";
+            }
+            if (!inputBean.getStatus().contentEquals("") || inputBean.getStatus().length() > 0) {
+                if (!condition.equals("")) {
+                    condition += " AND ";
+                }
+                condition += "CR.STATUS = '" + inputBean.getStatus() + "'";
+            }
+            if (!inputBean.getReasonCode().contentEquals("") || inputBean.getReasonCode().length() > 0) {
+                if (!condition.equals("")) {
+                    condition += " AND ";
+                }
+                condition += "CR.REQUESTREASONCODE = '" + inputBean.getReasonCode() + "'";
+            }
+            if (!condition.equals("")) {
+                defaultQuery += "  AND " + condition + " ORDER BY CR.CARDNUMBER";
+            } else {
+                defaultQuery += " ORDER BY CR.CARDNUMBER";
+            }
+
+            ps = con.prepareStatement(defaultQuery);
+            ps.setString(1, StatusVarList.DA_REQUSET_INITIATE);
+            ps.setString(2, inputBean.getLoggeduser());
+            ps.setString(3, inputBean.getLoggeduser());
+            rs = ps.executeQuery();
+
+            requestList = new ArrayList<RequestConfirmationBean>();
+
+            while (rs.next()) {
+                RequestConfirmationBean resultBean = new RequestConfirmationBean();
+
+                resultBean.setCardNo(rs.getString("CARDNUMBER"));
+                resultBean.setPriorityLevel(rs.getString("PRIORITYLEVEL"));
+                resultBean.setRemark(rs.getString("REMARKS"));
+                resultBean.setStatus(rs.getString("STATUS"));
+                resultBean.setStatusDes(rs.getString("APPROVESTATUS"));
+                resultBean.setCallLogID(rs.getString("CALLLOGID"));
+                resultBean.setApproveUser(rs.getString("APPROVEDUSER"));
+                resultBean.setRequestUser(rs.getString("REQUESTEDUSER"));
+                resultBean.setReasonCode(rs.getString("REQUESTREASONCODE"));
+                resultBean.setPriorityDes(rs.getString("PRIO_DES"));
+
+                requestList.add(resultBean);
+            }
+
+        } catch (SQLException sqlex) {
+
+            throw sqlex;
+        } catch (Exception ex) {
+
+            throw ex;
+        } finally {
+            try {
+                rs.close();
+                ps.close();
+
+            } catch (Exception e) {
+            }
+        }
+
+        return requestList;
+    }
+
+    public RequestConfirmationBean viewOneRequest(Connection con, String cardNo, String operation) throws SQLException, Exception {
+        RequestConfirmationBean reqBean = null;
+        PreparedStatement ps = null;
+
+        try {
+
+            String query = "SELECT CR.CARDNUMBER,CR.PRIORITYLEVEL,CR.REMARKS,CR.STATUS,S.DESCRIPTION AS CARDSTATUSDES,CR.CALLLOGID,CR.APPROVEDUSER,"
+                    + "CR.REQUESTEDUSER,CR.REQUESTREASONCODE,CR.RENEWCONFIRMATION,C.PINSTATUS,C.PINMAILSTATUS,C.PINDISTRIBUTIONSTATUS,"
+                    + "C.CREDITLIMIT,C.CASHLIMIT,C.EXPIERYDATE,C.CARDSTATUS "
+                    + "FROM CARDREQUEST CR,STATUS S,CARD C "
+                    + "WHERE S.STATUSCODE = C.CARDSTATUS AND CR.CARDNUMBER=? AND C.CARDNUMBER=? AND CR.REQUESTREASONCODE=? AND CR.STATUS=? ";
+            ps = con.prepareStatement(query);
+            ps.setString(1, cardNo);
+            ps.setString(2, cardNo);
+            ps.setString(3, operation);
+            ps.setString(4, StatusVarList.DA_REQUSET_INITIATE);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                reqBean = new RequestConfirmationBean();
+
+                reqBean.setCardNo(rs.getString("CARDNUMBER"));
+                reqBean.setPriorityLevel(rs.getString("PRIORITYLEVEL"));
+                reqBean.setRemark(rs.getString("REMARKS"));
+                reqBean.setStatus(rs.getString("CARDSTATUS"));
+                reqBean.setStatusDes(rs.getString("CARDSTATUSDES"));
+                reqBean.setCallLogID(rs.getString("CALLLOGID"));
+                reqBean.setApproveUser(rs.getString("APPROVEDUSER"));
+                reqBean.setRequestUser(rs.getString("REQUESTEDUSER"));
+                reqBean.setReasonCode(rs.getString("REQUESTREASONCODE"));
+                reqBean.setRenew(rs.getString("RENEWCONFIRMATION"));
+                reqBean.setPINStatus(rs.getString("PINSTATUS"));
+                reqBean.setPINMailStatus(rs.getString("PINMAILSTATUS"));
+                reqBean.setPINDistributeStatus(rs.getString("PINDISTRIBUTIONSTATUS"));
+                reqBean.setCreditLimit(rs.getString("CREDITLIMIT"));
+                reqBean.setCashLimit(rs.getString("CASHLIMIT"));
+                reqBean.setExpiryDate(rs.getString("EXPIERYDATE"));
+            }
+
+        } catch (SQLException sqlex) {
+
+            throw sqlex;
+        } catch (Exception ex) {
+
+            throw ex;
+        } finally {
+            try {
+                rs.close();
+                ps.close();
+
+            } catch (Exception e) {
+            }
+        }
+
+        return reqBean;
+    }
+
+    public int approveRequest(RequestConfirmationBean confBean, String approveStatus, String operation, Connection con) throws SQLException, Exception {
+        int row = -1;
+        int result1 = -1;
+        int result2 = -1;
+        int result3 = -1;
+        int result4 = -1;
+
+        String appId = "";
+        String expDate = "";
+        String reIssuePeriod = "";
+        String selectQuery = "";
+        String insertQuery = "";
+        String updateQuery1 = "";
+        String updateQuery2 = "";
+        String updateQuery3 = "";
+        String updateQuery4 = "";
+        PreparedStatement ps = null;
+
+        try {
+            //check
+
+            selectQuery = "SELECT APPLICATIONID, EXPIERYDATE, REISSUETHRESHHOLSPERIOD FROM CARD WHERE CARDNUMBER = ?"; //take the reissue threshold perid
+
+            ps = con.prepareStatement(selectQuery);
+            ps.setString(1, confBean.getCardNo());
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                appId = rs.getString("APPLICATIONID");
+                expDate = rs.getString("EXPIERYDATE");
+                reIssuePeriod = rs.getString("REISSUETHRESHHOLSPERIOD");
+
+            }
+
+            String yr = expDate.substring(0, 2);
+            String mon = expDate.substring(2);
+            String newDate = "";
+            int newMon = 0;
+            int newYr = 0;
+            String newMonString = "";
+            String newYrString = "";
+
+            if (Integer.parseInt(mon) >= Integer.parseInt(reIssuePeriod)) {
+                newMon = Integer.parseInt(mon) - Integer.parseInt(reIssuePeriod);
+                newMonString = String.valueOf(newMon);
+                if (newMonString.length() < 2) {
+                    newMonString = "0" + newMonString;
+                }
+
+                newDate = yr + newMonString;
+
+            } else if (Integer.parseInt(mon) < Integer.parseInt(reIssuePeriod)) {
+                newMon = Integer.parseInt(mon) + 12 - Integer.parseInt(reIssuePeriod);
+                newYr = Integer.parseInt(yr) - 1;
+                newMonString = String.valueOf(newMon);
+                newYrString = String.valueOf(newYr);
+                if (newMonString.length() < 2) {
+                    newMonString = "0" + newMonString;
+                }
+
+                newDate = newYrString + newMonString;
+            }
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+
+            Date tt = new Date();
+            Date today = new Date(tt.getTime());
+
+            String thisyr = df.format(today);
+
+            newDate = thisyr.substring(0, 2) + newDate;
+
+            Date newDate2 = df.parse(newDate);
+
+            if (!newDate2.after(today)) {
+
+                insertQuery = "INSERT INTO CARDRENEW (CARDNUMBER, EXPIRYDATE, STATUS, LASTUPDATEDUSER, CREATEDDATE, LASTUPDATEDTIME, RENEWALCONFIRMATIONDATE, LETTERGENERATIONSTATUS) "
+                        + "VALUES(?,?,'INIT',?,SYSDATE,SYSDATE,SYSDATE,'NO') ";
+
+                ps = con.prepareStatement(insertQuery);
+
+                ps.setString(1, confBean.getCardNo());
+                ps.setString(2, expDate);
+                ps.setString(3, confBean.getLastUpdatedUser());
+
+                ps.executeUpdate();
+            }
+
+            if (appId != null) {
+
+//                insertQuery = "INSERT INTO CARDAPPLICATIONSTATUS (APPLICATIONID,APPLICATIONSTATUS) VALUES (?,?) ";
+                updateQuery1 = "UPDATE CARDAPPLICATIONSTATUS SET APPLICATIONSTATUS=? WHERE APPLICATIONID=?";
+
+                ps = con.prepareStatement(updateQuery1);
+
+                ps.setString(1, approveStatus);
+                ps.setString(2, appId);
+
+                result1 = ps.executeUpdate();
+            }
+
+            if (result1 == 1) {
+
+                updateQuery2 = "UPDATE CARD SET PINSTATUS=?,PINMAILSTATUS=?,LASTUPDATEDUSER=?,LASTUPDATEDTIME=? WHERE CARDNUMBER=?";
+
+                ps = con.prepareStatement(updateQuery2);
+
+                ps.setString(1, confBean.getPINStatus());
+                ps.setString(2, confBean.getPINMailStatus());
+                ps.setString(3, confBean.getLastUpdatedUser());
+                ps.setTimestamp(4, SystemDateTime.getSystemDataAndTime());
+                ps.setString(5, confBean.getCardNo());
+
+                result2 = ps.executeUpdate();
+
+            }
+            if (result2 == 1) {
+
+                updateQuery3 = "UPDATE CARDREQUEST SET STATUS=?,APPROVEDUSER=?,LASTUPDATEDTIME=?,LASTUPDATEDUSER=?,REMARKS=? WHERE CARDNUMBER=? AND REQUESTREASONCODE=? AND STATUS=?";
+
+                ps = con.prepareStatement(updateQuery3);
+
+                ps.setString(1, StatusVarList.DA_REQUSET_APPROVE);
+                ps.setString(2, confBean.getLastUpdatedUser());
+                ps.setTimestamp(3, SystemDateTime.getSystemDataAndTime());
+                ps.setString(4, confBean.getLastUpdatedUser());
+                ps.setString(5, confBean.getRemark());
+
+                ps.setString(6, confBean.getCardNo());
+                ps.setString(7, operation);
+                ps.setString(8, StatusVarList.DA_REQUSET_INITIATE);
+
+                result3 = ps.executeUpdate();
+
+            }
+
+            if (operation.equals("CDRI")) {
+                updateQuery4 = "UPDATE CARD SET EMBOSSSTATUS=? WHERE CARDNUMBER=?";
+
+                ps = con.prepareStatement(updateQuery4);
+
+                ps.setString(1, confBean.getEmbossStatus());
+                ps.setString(2, confBean.getCardNo());
+
+                result4 = ps.executeUpdate();
+
+            } else {
+                result4 = 1;
+            }
+
+        } catch (SQLException sqlex) {
+
+            throw sqlex;
+        } catch (Exception ex) {
+
+            throw ex;
+        } finally {
+            try {
+                rs.close();
+                ps.close();
+
+            } catch (Exception e) {
+            }
+        }
+        if (result3 > 0) {
+            row = 1;
+        }
+        return row;
+    }
+
+    public int requsetReject(RequestConfirmationBean confBean, String operation, Connection CMSCon) throws Exception {
+        int result3 = -1;
+        PreparedStatement ps = null;
+
+        try {
+
+            String updateQuery3 = "UPDATE CARDREQUEST SET STATUS=?,APPROVEDUSER=?,LASTUPDATEDTIME=?,LASTUPDATEDUSER=?,REJECTREMARK=? WHERE CARDNUMBER=? AND REQUESTREASONCODE=? AND STATUS=?";
+
+            ps = CMSCon.prepareStatement(updateQuery3);
+
+            ps.setString(1, StatusVarList.DA_REQUSET_REJECT);
+            ps.setString(2, confBean.getLastUpdatedUser());
+            ps.setTimestamp(3, SystemDateTime.getSystemDataAndTime());
+            ps.setString(4, confBean.getLastUpdatedUser());
+            ps.setString(5, confBean.getRemark());
+
+            ps.setString(6, confBean.getCardNo());
+            ps.setString(7, operation);
+            ps.setString(8, StatusVarList.DA_REQUSET_INITIATE);
+
+            result3 = ps.executeUpdate();
+
+        } catch (SQLException ex) {
+            throw ex;
+        } finally {
+
+            ps.close();
+        }
+
+        return result3;
+
+    }
+
+    public List<RequestConfirmationBean> searchHistory(Connection con, RequestConfirmationBean confBean) throws SQLException, Exception {
+
+        List<RequestConfirmationBean> searchHistory = new ArrayList<RequestConfirmationBean>();
+
+        //hold the statement to be executed
+        PreparedStatement ps = null;
+        String defaultQuery = null;
+
+        try {
+
+            defaultQuery = "SELECT CAH.APPLICATIONID,CAH.APPLICATIONLEVEL,AL.DESCRIPTION AS LEVEL_DES,CAH.STATUS,S.DESCRIPTION AS STATUS_DES,CAH.CREATEDTIME "
+                    + "FROM CARDAPPLICATIONHISTORY CAH,APPLICATIONLEVEL AL,STATUS S "
+                    + "WHERE CAH.APPLICATIONID = ? AND CAH.STATUS=S.STATUSCODE AND AL.LEVELID=CAH.APPLICATIONLEVEL ORDER BY CAH.CREATEDTIME DESC";
+
+            ps = con.prepareStatement(defaultQuery);
+            ps.setString(1, confBean.getCardNo());
+            rs = ps.executeQuery();
+
+            searchHistory = new ArrayList<RequestConfirmationBean>();
+
+            while (rs.next()) {
+                RequestConfirmationBean resultBean = new RequestConfirmationBean();
+
+                resultBean.setCardNo(rs.getString("APPLICATIONID"));
+                resultBean.setApplicationLevel(rs.getString("APPLICATIONLEVEL"));
+                resultBean.setStatus(rs.getString("STATUS"));
+                resultBean.setApplicationLevelDes(rs.getString("LEVEL_DES"));
+                resultBean.setStatusDes(rs.getString("STATUS_DES"));
+
+                searchHistory.add(resultBean);
+            }
+
+        } catch (SQLException sqlex) {
+
+            throw sqlex;
+        } catch (Exception ex) {
+
+            throw ex;
+        } finally {
+            try {
+                rs.close();
+                ps.close();
+
+            } catch (Exception e) {
+            }
+        }
+
+        return searchHistory;
+    }
+}

@@ -1,0 +1,538 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.admin.controlpanel.sysusermgt.servlet;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemUserBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.system.util.exception.AccessDeniedException;
+import com.epic.cms.system.util.exception.NewLoginSessionException;
+import com.epic.cms.system.util.exception.SesssionExpException;
+import com.epic.cms.system.util.security.CMSMd5;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.validate.UserInputValidator;
+import com.epic.cms.system.util.variable.ApplicationVarList;
+import com.epic.cms.system.util.variable.MessageVarList;
+import com.epic.cms.system.util.variable.OracleMessage;
+import com.epic.cms.system.util.variable.PageVarList;
+import com.epic.cms.system.util.variable.SectionVarList;
+import com.epic.cms.system.util.variable.StatusVarList;
+import com.epic.cms.system.util.variable.TaskVarList;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author janaka_h
+ */
+public class AddSystemUserServlet extends HttpServlet {
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    private RequestDispatcher rd;
+    private SystemUserManager systemUserManager;
+    HttpSession sessionObj;
+    private SessionUser sessionUser;
+    private SessionVarList sessionVarlist;
+    private List<String> userTaskList;
+    private SystemAuditBean systemAuditBean = null;
+    private String url = "/LoadSystemUserServlet";
+    private String newValue;
+
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        SystemUserBean userBean = new SystemUserBean();
+        try {
+            sessionObj = request.getSession(false);
+            try {
+                systemUserManager = new SystemUserManager();
+                sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+                sessionUser = sessionVarlist.getCMSSessionUser();
+
+                //check system user is in same session or not
+                try {
+
+                    if (!systemUserManager.validateUserSession(sessionUser.getUserName(), sessionObj.getId())) {
+                        //useer not in same session.
+                        throw new NewLoginSessionException();
+
+                    }
+
+                } catch (NewLoginSessionException nlex) {
+                    //throw lst login close exception
+                    throw new NewLoginSessionException();
+
+                }
+
+            } catch (NullPointerException ex) {
+                //throw session null exception
+                throw new SesssionExpException();
+            }
+
+            //set page code and task codes
+            String pageCode = PageVarList.SYSTEMUSER;
+            String taskCode = TaskVarList.ADD;
+
+            //check whethre userrole have an access for this page and task
+            if (this.isValidAccess(sessionUser.getUserRole(), pageCode, taskCode)) {
+
+                userBean.setUserName(request.getParameter("username"));
+                userBean.setUserRoleCode(request.getParameter("userroal"));
+                userBean.setStatusCode(request.getParameter("status"));
+                userBean.setDualUserRoleCode(request.getParameter("dualUserroal"));
+                userBean.setTitle(request.getParameter("title"));
+                userBean.setInitials(request.getParameter("initials"));
+                userBean.setFirstName(request.getParameter("firstname"));
+                userBean.setLastName(request.getParameter("lastname"));
+                userBean.setBankname(request.getParameter("bankname"));
+                userBean.setBranchname(request.getParameter("branchname"));
+                userBean.setDesignation(request.getParameter("designation"));
+                userBean.setServiseid(request.getParameter("serviseid"));
+                userBean.setTelNo(request.getParameter("telephone"));
+                userBean.setNic(request.getParameter("nic"));
+                userBean.setEmail(request.getParameter("email"));
+                userBean.setGender(request.getParameter("gender"));
+                userBean.setBirthday(request.getParameter("birthday"));
+                userBean.setExpiryDateToString(request.getParameter("expdate"));
+                userBean.setInitialloginstatus(StatusVarList.IS_FIRST_LOGIN);
+                userBean.setIslockedforauth(StatusVarList.IS_LOCKED_AUTH);
+
+                SystemUserBean invalidMsgBean = this.isValiedUser(userBean);
+
+                if (invalidMsgBean == null) {
+
+                    String password = CMSMd5.cmsMd5("");
+                    userBean.setPassword(password);
+                    userBean.setRequestedUser(sessionUser.getUserName());
+                    userBean.setIsEmailSent("N");
+
+                    StringBuffer buff = new StringBuffer();
+
+                    buff.append(userBean.getUserName()).append("|");
+                    buff.append(userBean.getUserRoleCode()).append("|").append(userBean.getStatusCode()).append("|").append(userBean.getDualUserRoleCode()).append("|");
+                    buff.append(userBean.getTitle()).append("|").append(userBean.getInitials()).append("|").append(userBean.getFirstName()).append("|").append(userBean.getLastName()).append("|");
+                    buff.append(userBean.getBankname()).append("|").append(userBean.getBranchname()).append("|").append(userBean.getDesignation()).append("|").append(userBean.getServiseid()).append("|");
+                    buff.append(userBean.getTelNo()).append("|").append(userBean.getNic()).append("|").append(userBean.getEmail()).append("|").append(userBean.getGender()).append("|").append(userBean.getBirthday()).append("|").append(userBean.getExpiryDateToString()).append("|");
+                    buff.append(userBean.getRequestedUser()).append("|").append(userBean.getIsEmailSent()).append("|").append(userBean.getInitialloginstatus());
+
+                    newValue = buff.toString();
+
+                    systemUserManager = new SystemUserManager();
+                    userBean.setLastUpdatedUser(sessionUser.getUserName());
+                    this.setAudittraceValueToRequest(request, userBean);
+                    int isAdd = systemUserManager.insertSystemUserRequest(userBean, systemAuditBean);
+
+                    if (isAdd == 1) {
+                        request.setAttribute("successMsg", MessageVarList.USER_APPROVAL_SENT);
+                        rd = getServletContext().getRequestDispatcher(url);
+                        rd.forward(request, response);
+                    } else {
+
+                        request.setAttribute("userBean", userBean);
+                        request.setAttribute("operation", "add");
+                        request.setAttribute("errorMsg", MessageVarList.ERROR_USER_APPROVAL_SENT);
+                        rd = getServletContext().getRequestDispatcher("/ManageSystemUserServlet");
+                        rd.forward(request, response);
+                    }
+
+                } else {
+                    //remove RQIN status from user bean
+                    userBean.setStatusCode(null);
+                    request.setAttribute("userBean", userBean);
+                    request.setAttribute("operation", "add");
+                    request.setAttribute("invalidMsgBean", invalidMsgBean);
+                    rd = getServletContext().getRequestDispatcher("/ManageSystemUserServlet");
+                    rd.forward(request, response);
+                }
+
+            } else {
+
+                //if invalid throw accessdenied exception
+                throw new AccessDeniedException();
+
+            }
+
+        } catch (SQLException ex) {
+            request.setAttribute("userBean", userBean);
+            request.setAttribute("operation", "add");
+            request.setAttribute("errorMsg", OracleMessage.getMessege(ex.getMessage()));
+            rd = getServletContext().getRequestDispatcher("/ManageSystemUserServlet");
+            rd.forward(request, response);
+        } //catch session exception
+        catch (SesssionExpException sex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.SESSION_EXPIRED);
+            rd.forward(request, response);
+
+        } //catch session exception
+        catch (NewLoginSessionException nlex) {
+
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.LAST_SESSION_CLOSE);
+            rd.forward(request, response);
+
+        } //catch accessdenied exception
+        catch (AccessDeniedException adex) {
+            //redirect to login page
+            request.setAttribute("errorMsg", MessageVarList.ACCESS_DENIED_TASK);
+            rd = getServletContext().getRequestDispatcher(url);
+            rd.forward(request, response);
+        } catch (Exception ex) {
+            request.setAttribute("userBean", userBean);
+            request.setAttribute("operation", "add");
+            request.setAttribute("errorMsg", MessageVarList.ERROR_ADD);
+            rd = getServletContext().getRequestDispatcher("/ManageSystemUserServlet");
+            rd.forward(request, response);
+
+        } finally {
+            out.close();
+        }
+    }
+
+    private void setAudittraceValue(HttpServletRequest request, SystemUserBean userBean) throws Exception {
+
+        try {
+            systemAuditBean = new SystemAuditBean();
+            ////get unique Id from the page.It may be the primary key---------------
+            String uniqueId = request.getParameter("");
+
+            systemAuditBean.setUserRoleCode(sessionVarlist.getCMSSessionUser().getUserRole());
+            systemAuditBean.setUserName(sessionVarlist.getCMSSessionUser().getUserName());
+            //set unique id
+            systemAuditBean.setUniqueId(uniqueId);
+            //set description 
+            systemAuditBean.setDescription("Add System user, user name: " + userBean.getUserName() + " by " + sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setApplicationCode(ApplicationVarList.ADMINISTRATION_APPLICATION);
+            systemAuditBean.setSectionCode(SectionVarList.USERMANAGEMENT);
+            systemAuditBean.setPageCode(PageVarList.SYSTEMUSER);
+            systemAuditBean.setTaskCode(TaskVarList.ADD);
+            systemAuditBean.setIp(request.getRemoteAddr());
+            //add remarks here
+            systemAuditBean.setRemarks("");
+            //set field name which is being changed(only if)
+            systemAuditBean.setFieldName("");
+            //set old value of change if required
+            systemAuditBean.setOldValue("");
+            //set new value of change if required
+            systemAuditBean.setNewValue(newValue);
+
+            systemAuditBean.setLastUpdateduser(sessionVarlist.getCMSSessionUser().getUserName());
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void setAudittraceValueToRequest(HttpServletRequest request, SystemUserBean userBean) throws Exception {
+
+        try {
+            systemAuditBean = new SystemAuditBean();
+            ////get unique Id from the page.It may be the primary key---------------
+            String uniqueId = request.getParameter("");
+
+            systemAuditBean.setUserRoleCode(sessionVarlist.getCMSSessionUser().getUserRole());
+            systemAuditBean.setUserName(sessionVarlist.getCMSSessionUser().getUserName());
+            //set unique id
+            systemAuditBean.setUniqueId(uniqueId);
+            //set description 
+            systemAuditBean.setDescription("Add System User Request, user name: " + userBean.getUserName() + " by " + sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setApplicationCode(ApplicationVarList.ADMINISTRATION_APPLICATION);
+            systemAuditBean.setSectionCode(SectionVarList.USERMANAGEMENT);
+            systemAuditBean.setPageCode(PageVarList.SYSTEMUSER);
+            systemAuditBean.setTaskCode(TaskVarList.ADD);
+            systemAuditBean.setIp(request.getRemoteAddr());
+            //add remarks here
+            systemAuditBean.setRemarks("");
+            //set field name which is being changed(only if)
+            systemAuditBean.setFieldName("");
+            //set old value of change if required
+            systemAuditBean.setOldValue("");
+            //set new value of change if required
+            systemAuditBean.setNewValue(newValue);
+
+            systemAuditBean.setLastUpdateduser(sessionVarlist.getCMSSessionUser().getUserName());
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private boolean isValidAccess(String userrole, String pagecode, String task) throws Exception {
+        boolean isValidTaskAccess = false;
+
+        try {
+            systemUserManager = new SystemUserManager();
+
+            //get all tasks for userrole for this page
+            userTaskList = systemUserManager.getTasksByPageCodeAndUserRole(userrole, pagecode);
+
+            for (String usertask : userTaskList) {
+
+                if (task.equals(usertask)) {
+                    isValidTaskAccess = true;
+                }
+
+            }
+
+            return isValidTaskAccess;
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+    }
+
+    private SystemUserBean isValiedUser(SystemUserBean userBean) throws Exception {
+        UserInputValidator validObject = new UserInputValidator();
+        SystemUserBean invalidMsgBean = new SystemUserBean();
+        //PasswordPolicyBean passwordPolicyBean = new PasswordPolicyBean();
+        int msg = 0;
+        try {
+            //----------------------------------------------------------------------------           
+
+            if (userBean.getUserName().isEmpty()) {
+                invalidMsgBean.setUserName("Requierd");
+                msg = 1;
+            } else if (!validObject.isAlphaNumeric(userBean.getUserName())) {
+                invalidMsgBean.setUserName("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+//            if (userBean.getPassword().isEmpty()) {
+//                invalidMsgBean.setPassword("Requierd");
+//                msg = 1;
+//            } else {
+//                passwordPolicyBean = PasswordPolicyManager.getPasswordPolicyManager().getPasswordPolicyDetails();
+//                List<UserPasswordBean> userPasswordBeanList = systemUserManager.getUserPasswordBeanList(userBean.getUserName(), userBean.getPassword());
+//                String sucsses = validObject.CheckPasswordValidity(userBean.getPassword(), passwordPolicyBean, userPasswordBeanList);
+//                if (sucsses != null) {
+//                    invalidMsgBean.setPassword(sucsses);
+//                    msg = 1;
+//                }
+//            }
+            //---------------------------------------------------------------------------- 
+//            if (userBean.getConfirmPassword().isEmpty()) {
+//                invalidMsgBean.setConfirmPassword("Requierd");
+//                msg = 1;
+//            } else {
+//            }
+            //---------------------------------------------------------------------------- 
+//            if (!userBean.getPassword().isEmpty() && !userBean.getConfirmPassword().isEmpty()) {
+//                if (!userBean.getPassword().equals(userBean.getConfirmPassword())) {
+//                    invalidMsgBean.setConfirmPassword("Invalid");
+//                    msg = 1;
+//                }
+//            } else {
+//            }
+            //----------------------------------------------------------------------------   
+            if (userBean.getUserRoleCode().isEmpty()) {
+                invalidMsgBean.setUserRoleCode("Requierd");
+                msg = 1;
+            } else {
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getStatusCode().isEmpty()) {
+                invalidMsgBean.setStatusCode("Requierd");
+                msg = 1;
+            } else {
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getDualUserRoleCode().isEmpty()) {
+                invalidMsgBean.setDualUserRoleCode("Requierd");
+                msg = 1;
+            } else {
+            }
+            //----------------------------------------------------------------------------                
+            if (userBean.getTitle() == null) {
+                invalidMsgBean.setTitle("Requierd");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------           
+            if (userBean.getInitials().isEmpty()) {
+                invalidMsgBean.setInitials("Requierd");
+                msg = 1;
+            } else if (!validObject.isNonNumericNonSpecialString(userBean.getInitials())) {
+                invalidMsgBean.setInitials("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------           
+            if (userBean.getFirstName().isEmpty()) {
+                invalidMsgBean.setFirstName("Requierd");
+                msg = 1;
+            } else if (!validObject.isNonNumericNonSpecialString(userBean.getFirstName())) {
+                invalidMsgBean.setFirstName("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getLastName().isEmpty()) {
+                invalidMsgBean.setLastName("Requierd");
+                msg = 1;
+            } else if (!validObject.isNonNumericNonSpecialString(userBean.getLastName())) {
+                invalidMsgBean.setLastName("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getBankname().isEmpty()) {
+                invalidMsgBean.setBankname("Requierd");
+                msg = 1;
+            } else if (!validObject.isNonNumericNonSpecialString(userBean.getBankname())) {
+                invalidMsgBean.setBankname("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getBranchname().isEmpty()) {
+                invalidMsgBean.setBranchname("Requierd");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getDesignation().isEmpty()) {
+                //invalidMsgBean.setDesignation("Requierd");
+                //msg = 1;
+            } else if (!validObject.isNonNumericNonSpecialString(userBean.getDesignation())) {
+                invalidMsgBean.setDesignation("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getServiseid().isEmpty()) {
+                invalidMsgBean.setServiseid("Requierd");
+                msg = 1;
+            } else if (!validObject.isAlphaNumeric(userBean.getServiseid())) {
+                invalidMsgBean.setServiseid("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getTelNo().isEmpty()) {
+                invalidMsgBean.setTelNo("Requierd");
+                msg = 1;
+            } else if (!validObject.isNumeric(userBean.getTelNo())) {
+                invalidMsgBean.setTelNo("Invalid");
+                msg = 1;
+            } else if (userBean.getTelNo().length() < 8 || userBean.getTelNo().length() > 20) {
+                invalidMsgBean.setTelNo("Invalid length");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getNic().isEmpty()) {
+                invalidMsgBean.setNic("Requierd");
+                msg = 1;
+
+            } else if (!validObject.checkNIC(userBean.getNic())) {
+                invalidMsgBean.setNic("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getEmail().isEmpty()) {
+                invalidMsgBean.setEmail("Requierd");
+                msg = 1;
+            } else if (!validObject.isValidEmail(userBean.getEmail())) {
+                invalidMsgBean.setEmail("Invalid");
+                msg = 1;
+            }
+            //----------------------------------------------------------------------------            
+            if (userBean.getGender() == null) {
+                invalidMsgBean.setGender("Requierd");
+                msg = 1;
+            } else if (userBean.getGender().equals("MALE") && (userBean.getTitle().equals("MRS") || userBean.getTitle().equals("MS"))) {
+                invalidMsgBean.setGender("Gender not match with title");
+                msg = 1;
+            } else if (userBean.getGender().equals("FEMALE") && userBean.getTitle().equals("MR")) {
+                invalidMsgBean.setGender("Gender not match with title");
+                msg = 1;
+            }
+
+            //----------------------------------------------------------------------------            
+            if (userBean.getBirthday().isEmpty()) {
+                //invalidMsgBean.setBirthday("Requierd");
+                //msg = 1;
+            } else {
+            }
+            //----------------------------------------------------------------------------
+            if (userBean.getExpiryDateToString().isEmpty()) {
+                invalidMsgBean.setExpiryDateToString("Requierd");
+                msg = 1;
+            } else {
+            }
+            //----------------------------------------------------------------------------
+
+            if (msg == 0) {
+                return null;
+
+            } else {
+                return invalidMsgBean;
+            }
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            processRequest(request, response);
+        } catch (Exception ex) {
+            Logger.getLogger(AddSystemUserServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            processRequest(request, response);
+        } catch (Exception ex) {
+            Logger.getLogger(AddSystemUserServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

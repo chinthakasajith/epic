@@ -1,0 +1,883 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.callcenter.callcentersearch.businesslogic;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.PageBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SectionBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemAuditManager;
+import com.epic.cms.callcenter.callcentersearch.bean.CallHistoryBean;
+import com.epic.cms.callcenter.callcentersearch.bean.CallLogBean;
+
+//import com.epic.cms.callcenter.callcentersearch.bean.FilledDataBean;
+
+import com.epic.cms.callcenter.callcentersearch.bean.CustomerSearchBean;
+
+import com.epic.cms.callcenter.callcentersearch.bean.MerchantSearchBean;
+import com.epic.cms.callcenter.callcentersearch.bean.QuestionAnswerBean;
+import com.epic.cms.callcenter.callcentersearch.bean.TransactionBean;
+import com.epic.cms.callcenter.callcentersearch.bean.ViewDataBean;
+import com.epic.cms.callcenter.callcentersearch.bean.ViewMerchantCustomerBean;
+import com.epic.cms.callcenter.callcentersearch.bean.ViewMerchantLocationBean;
+import com.epic.cms.callcenter.callcentersearch.bean.ViewTerminalBean;
+import com.epic.cms.callcenter.callcentersearch.persistance.CallCenterMgtPersistance;
+import com.epic.cms.callcenter.customer.bean.CustomerContactDetailsChngeHolderBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CustomerPersonalBean;
+import com.epic.cms.system.util.config.DBConnection;
+import com.epic.cms.system.util.config.DBConnectionToOnlineDB;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ *
+ * @author badrika
+ */
+public class CallCenterMgtManager {
+
+    private CallCenterMgtPersistance perObj;
+    private SystemAuditManager sysAuditManager;
+    private Connection cmsCon,CMSOnline = null;
+//    private Connection CMSOnline = null;
+    private List<QuestionAnswerBean> answerBeanList;
+    private List<ViewDataBean> appList, cusList, accList, cardList;//viewList, 
+    private List<CustomerSearchBean> advancedList;//viewList, 
+    private List<ViewMerchantCustomerBean> mercusList;
+    private List<ViewMerchantLocationBean> locList;
+    private List<ViewTerminalBean> terList;
+    private Map<SectionBean, List<PageBean>> sectionPageList;
+    private CallCenterMgtPersistance callCenPer = null;
+    private List<String> merchantList = null;
+    private List<TransactionBean> txnList = null;
+
+//     public List<ApplicationAssignBean> userModifyApplicationsSearch(SearchUserAssignAppBean searchBean, SystemAuditBean systemAuditBean) throws Exception {
+//        try {
+//            persistance = new CustomerPersonalPersistance();
+//            sysAuditManager = new SystemAuditManager();
+//            CMSCon = DBConnection.getConnection();
+//            CMSCon.setAutoCommit(false);
+//
+//            searchList = persistance.userModifyApplicationsSearch(CMSCon, searchBean);
+//            //sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+//            CMSCon.commit();
+//        } catch (SQLException ex) {
+//            try {
+//                CMSCon.rollback();
+//                throw ex;
+//            } catch (SQLException sqx) {
+//                throw sqx;
+//            }
+//
+//
+//        } catch (Exception ex) {
+//            CMSCon.rollback();
+//            throw ex;
+//
+//        } finally {
+//            if (CMSCon != null) {
+//                try {
+//                    CMSCon.close();
+//                } catch (SQLException e) {
+//                    throw e;
+//                }
+//            }
+//        }
+//
+//
+//        return searchList;
+//    }
+    public Map<SectionBean, List<PageBean>> getSectionPage(String userRole, String application, String sectionCode) throws Exception {
+
+        try {
+
+            perObj = new CallCenterMgtPersistance();
+            //sysUserPerObj = new SystemUserPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            //sectionPageList = sysUserPerObj.getSectionPageList(cmsCon, userRole, application);
+            sectionPageList = perObj.getSectionPageList(cmsCon, userRole, application, sectionCode);
+
+            return sectionPageList;
+
+
+        } catch (SQLException ex) {
+            try {
+                cmsCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+
+        } catch (Exception ex) {
+            cmsCon.rollback();
+            throw ex;
+
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public List<ViewDataBean> searchApplication(CustomerSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            appList = perObj.searchApplication(cmsCon, filledBean);
+            cmsCon.commit();
+            return appList;
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public List<CustomerSearchBean> searchAdvanced(CustomerSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            advancedList = perObj.searchAdvanced(cmsCon, filledBean);
+            cmsCon.commit();
+            return advancedList;
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        }
+    }
+    
+    public List<ViewDataBean> searchCustomer(CustomerSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            cusList = perObj.searchCustomer(cmsCon, filledBean);
+            cmsCon.commit();
+            return cusList;
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public List<ViewDataBean> searchAccount(CustomerSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            CMSOnline = DBConnectionToOnlineDB.getConnection();
+            
+            cmsCon.setAutoCommit(false);
+            CMSOnline.setAutoCommit(false);
+            
+            accList = perObj.searchAccount(cmsCon, CMSOnline, filledBean);
+            
+            cmsCon.commit();
+            CMSOnline.commit();
+            return accList;
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                CMSOnline.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+            if (CMSOnline != null) {
+                try {
+                    CMSOnline.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public List<ViewDataBean> searchCard(CustomerSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            CMSOnline = DBConnectionToOnlineDB.getConnection();
+            
+            cmsCon.setAutoCommit(false);
+            CMSOnline.setAutoCommit(false);
+            
+            cardList = perObj.searchCard(cmsCon, CMSOnline, filledBean);
+            
+            cmsCon.commit();
+            CMSOnline.commit();
+            return cardList;
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                CMSOnline.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+            if (CMSOnline != null) {
+                try {
+                    CMSOnline.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public List<ViewMerchantCustomerBean> searchMerchantCustomer(MerchantSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            sysAuditManager = new SystemAuditManager();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            mercusList = perObj.searchMerchantCustomer(cmsCon, filledBean);
+            cmsCon.commit();
+
+            return mercusList;
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    //searchMerchantLocation
+    public List<ViewMerchantLocationBean> searchMerchantLocation(MerchantSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            sysAuditManager = new SystemAuditManager();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            locList = perObj.searchMerchantLocation(cmsCon, filledBean);
+            cmsCon.commit();
+
+            return locList;
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    //searchTerminal
+    public List<ViewTerminalBean> searchTerminal(MerchantSearchBean filledBean) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            sysAuditManager = new SystemAuditManager();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            terList = perObj.searchTerminal(cmsCon, filledBean);
+            cmsCon.commit();
+
+            return terList;
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public List<QuestionAnswerBean> getQuestionList(String questionType, String questionCategory, String cardNumber, String applicationId) throws Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+
+            //    questionBeanList = perObj.getQuestionList(cmsCon, questionType, cardCategory);
+
+            answerBeanList = perObj.getQuestionList(cmsCon, questionType, questionCategory, cardNumber, applicationId);
+
+            cmsCon.commit();
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return answerBeanList;
+    }
+
+    public String isCardExsists(CustomerSearchBean searchbean) throws Exception {
+        String card = "";
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            card = perObj.isCardExsists(cmsCon, searchbean);
+            cmsCon.commit();
+
+            // check again    sysAuditManager.insertAudit(systemAuditBean, cmsCon);
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return card;
+    }
+
+    public String isApplicationsExsists(CustomerSearchBean searchbean) throws Exception {
+        String application = "";
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            application = perObj.isApplicationsExsists(cmsCon, searchbean);
+            cmsCon.commit();
+
+            // check again    sysAuditManager.insertAudit(systemAuditBean, cmsCon);
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return application;
+    }
+
+    public String isMerchantCustomerExsists(MerchantSearchBean searchbean) throws Exception {
+        String cusID = "";
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            cusID = perObj.isMerchantCustomerExsists(cmsCon, searchbean);
+            cmsCon.commit();
+
+            // check again    sysAuditManager.insertAudit(systemAuditBean, cmsCon);
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return cusID;
+    }
+
+    public String isMidExsists(MerchantSearchBean searchbean) throws Exception {
+        String mid = "";
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            mid = perObj.isMidExsists(cmsCon, searchbean);
+            cmsCon.commit();
+
+            // check again    sysAuditManager.insertAudit(systemAuditBean, cmsCon);
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return mid;
+    }
+
+    public String isTidExsists(MerchantSearchBean searchbean) throws Exception {
+        String tid = "";
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+            tid = perObj.isTidExsists(cmsCon, searchbean);
+            cmsCon.commit();
+
+            // check again    sysAuditManager.insertAudit(systemAuditBean, cmsCon);
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return tid;
+    }
+
+    public List<QuestionAnswerBean> getAcquireQuestionList(String questionType, String questionCategory, String id, String idType) throws Exception {
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+
+
+            //    questionBeanList = perObj.getQuestionList(cmsCon, questionType, cardCategory);
+
+            answerBeanList = perObj.getAcquireQuestionList(cmsCon, questionType, questionCategory, id, idType);
+
+            cmsCon.commit();
+
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return answerBeanList;
+    }
+
+    /////////////////// Merchant Transaction Explorer
+    public int getCountTxn(String condition, String merchantCustomer) throws Exception {
+        int totCount = 0;
+        try {
+            callCenPer = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            CMSOnline = DBConnectionToOnlineDB.getConnection();
+            merchantList = new ArrayList<String>();
+
+            cmsCon.setAutoCommit(false);
+            CMSOnline.setAutoCommit(false);
+
+            merchantList = callCenPer.getMerchantOfCustomer(cmsCon, merchantCustomer);
+
+            for (int i = 0; i < merchantList.size(); i++) {
+                int count = callCenPer.getCountTxn(CMSOnline, condition, merchantList.get(i));
+                totCount = totCount + count;
+            }
+            cmsCon.commit();
+            CMSOnline.commit();
+
+        } catch (Exception ex) {
+            try {
+                cmsCon.rollback();
+                CMSOnline.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null || CMSOnline != null) {
+                try {
+                    cmsCon.close();
+                    CMSOnline.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return totCount;
+    }
+
+    public List<TransactionBean> getTxnExpDetails(String condition, int start, int end, String merchantCustomer) throws Exception {
+        try {
+            callCenPer = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            CMSOnline = DBConnectionToOnlineDB.getConnection();
+            merchantList = new ArrayList<String>();
+            txnList = new ArrayList<TransactionBean>();
+
+            cmsCon.setAutoCommit(false);
+            CMSOnline.setAutoCommit(false);
+
+            merchantList = callCenPer.getMerchantOfCustomer(cmsCon, merchantCustomer);
+
+            for (int i = 0; i < merchantList.size(); i++) {
+                txnList = callCenPer.getTxnExpDetails(CMSOnline, condition, start, end, merchantList.get(i), txnList);
+            }
+
+            cmsCon.commit();
+            CMSOnline.commit();
+
+        } catch (Exception ex) {
+            try {
+                cmsCon.rollback();
+                CMSOnline.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null || CMSOnline != null) {
+                try {
+                    cmsCon.close();
+                    CMSOnline.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return txnList;
+    }
+
+    public int getMerchantTxnCount(String condition, String merchantId) throws Exception {
+        int totCount = 0;
+        try {
+            callCenPer = new CallCenterMgtPersistance();
+            CMSOnline = DBConnectionToOnlineDB.getConnection();
+            merchantList = new ArrayList<String>();
+
+            CMSOnline.setAutoCommit(false);
+
+            totCount = callCenPer.getCountTxn(CMSOnline, condition, merchantId);
+
+            CMSOnline.commit();
+
+        } catch (Exception ex) {
+            try {
+                CMSOnline.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSOnline != null) {
+                try {
+                    CMSOnline.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return totCount;
+    }
+
+    public List<TransactionBean> getMerchantTxnExpDetails(String condition, int start, int end, String merchantId) throws Exception {
+        try {
+            callCenPer = new CallCenterMgtPersistance();
+            CMSOnline = DBConnectionToOnlineDB.getConnection();
+            merchantList = new ArrayList<String>();
+            txnList = new ArrayList<TransactionBean>();
+
+            CMSOnline.setAutoCommit(false);
+
+            txnList = callCenPer.getMerchantTxnExpDetails(CMSOnline, condition, start, end, merchantId);
+
+            CMSOnline.commit();
+
+        } catch (Exception ex) {
+            try {
+                CMSOnline.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSOnline != null) {
+                try {
+                    CMSOnline.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return txnList;
+    }
+
+    public String getMaxCallLogId() throws Exception, SQLException {
+
+        String id = null;
+        try {
+
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            id = perObj.getMaxCallLogId(cmsCon);
+            cmsCon.commit();
+
+        } catch (Exception ex) {
+
+            cmsCon.rollback();
+            throw ex;
+
+        } finally {
+
+            DBConnection.dbConnectionClose(cmsCon);
+        }
+        return id;
+    }
+
+    //insert the call log record
+    public int insertCallLog(CallLogBean logBean) throws SQLException, Exception {
+
+        int i = -1;
+        try {
+
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            i = perObj.insertCallLog(cmsCon, logBean);
+            cmsCon.commit();
+
+        } catch (Exception e) {
+            cmsCon.rollback();
+            throw e;
+        } finally {
+            DBConnection.dbConnectionClose(cmsCon);
+        }
+        return i;
+
+    }
+    
+    public int verifyOrRejectCaller(SystemAuditBean systemAuditBean,CallHistoryBean callhistoryBean) throws SQLException, Exception {
+
+        int i = -1;
+        try {            
+            sysAuditManager = new SystemAuditManager();
+            
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);            
+            
+            sysAuditManager.insertAudit(systemAuditBean, cmsCon);
+            this.insertCallHistory(callhistoryBean, cmsCon); //comment by badrika
+            
+            cmsCon.commit();
+
+        } catch (Exception e) {
+            cmsCon.rollback();
+            throw e;
+        } finally {
+            DBConnection.dbConnectionClose(cmsCon);
+        }
+        return i;
+
+    }
+
+    //insert call history record
+    public int insertCallHistory(CallHistoryBean historyBean, Connection con) throws SQLException, Exception {
+
+        int i = -1;
+        try {
+
+            perObj = new CallCenterMgtPersistance();
+            i = perObj.insertCallHistory(historyBean, con);
+
+        } catch (Exception e) {
+            throw e;
+        } finally {
+        }
+        return i;
+
+    }
+    //
+
+    public void addCustomerDetailChangeRequest(CustomerPersonalBean customerPersonalBean, CustomerContactDetailsChngeHolderBean changeTracker, String cardNumber, String cardCategory) throws SQLException, Exception {
+        try {
+            cmsCon = DBConnection.getConnection();
+            perObj = new CallCenterMgtPersistance();
+            perObj.addCustomerDetailChangeRequest( customerPersonalBean,  changeTracker,  cardNumber,  cardCategory,cmsCon);
+
+        } catch (Exception e) {
+            cmsCon.rollback();
+            throw e;
+        } 
+    }
+
+    public List<ViewDataBean> searchCustomerwithCategory(CustomerSearchBean searchbean, String cardCategoryCode) throws SQLException, Exception {
+
+        try {
+            perObj = new CallCenterMgtPersistance();
+            cmsCon = DBConnection.getConnection();
+            cmsCon.setAutoCommit(false);
+            cusList = perObj.searchCustomerwithCategory(cmsCon, searchbean ,cardCategoryCode);
+            cmsCon.commit();
+            return cusList;
+        } catch (Exception e) {
+            try {
+                cmsCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (cmsCon != null) {
+                try {
+                    cmsCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+}

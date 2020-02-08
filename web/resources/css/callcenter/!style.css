@@ -1,0 +1,98 @@
+body{
+
+    background:#000000; 
+    margin: 0px;
+    top: 0px;
+}
+#container { 
+    width:80%;  background:#000000; 
+    height:600px; 
+    float : left;
+
+    -webkit-border-radius: 1em;
+    -moz-border-radius: 1em;
+    border-radius: 1em;
+}
+#sidebar { 
+    width:20%;   background:#000000; 
+    height:600px;
+    float : left;
+
+    -moz-border-radius: 2em 0;
+    -webkit-border-radius: 24px 0;
+}
+
+/*#sidebar {
+        float: left;
+        width:20%;
+        height:600px;
+        padding: 0px;
+        color: #3FC4EF;
+}*/
+
+#sidebar1{ 
+    width:100%;  background:#000000; 
+    height:100px;
+    float : left;
+
+    -moz-border-radius: 2em 0;
+    -webkit-border-radius: 24px 0;
+
+}
+#header { 
+    width:100%;   
+
+    /* background: url(../../images/topreapeat3.png) repeat-x;
+     background: url(../../images/topbanner.gif) no-repeat;*/
+    // background: #A99F93;
+    height : 143px;
+}
+#navigator { 
+    width:100%;   
+
+    height : 20px;
+}
+#footer { 
+    clear : both;
+    width:100%;
+    background:#C8BDAE; 
+    height : 30px;
+}
+
+#issure{
+    width:90%;   background:#000000; 
+    height:500px;
+    float : left;
+    padding:3px 3px 3px 3px;
+    margin:9px;
+
+    -webkit-border-radius: 1em;
+    -moz-border-radius: 1em;
+    -o-border-radius: 1em;
+
+}
+#content{
+
+    margin: 0px;
+}
+#maincontent{
+    margin:7px;
+
+    width:98%;   background:#FFFFFF; 
+    height:95%;
+    -webkit-border-radius: 1em;
+    -moz-border-radius: 1em;
+    -o-border-radius: 1em;
+
+
+}
+.serchform{
+    font-family: Verdana, Geneva, sans-serif;
+    margin-top:10px;
+    font-size:12px;
+    width:96%;
+}
+.textField{
+    margin-left: 2px;
+    width: 100%;
+}

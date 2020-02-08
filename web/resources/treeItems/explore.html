@@ -1,0 +1,162 @@
+
+
+<style type="text/css">
+#loadDiv{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: X-small;
+}
+
+#colorDiv{
+	display: inline;
+	width: 300px;
+}
+</style>
+<script type="text/javascript">
+$(document).ready(function (){
+//$('#previewDiv').hide();
+loadColorPalet();
+});
+
+
+function showDtl(){
+$('#previewDiv').show();
+
+}
+
+
+function loadColorPalet(){
+$('#colorDiv').load('DIE/colorPalet.html');
+}
+
+
+function applicationTableView(url){
+
+$('#previewDiv').load(url);
+}
+
+
+
+
+
+function showExploreResult(){
+var st = $('#statusID').val();
+
+
+switch(st)
+{
+  case '0':
+  applicationTableView('DIE/new.html');
+  break;
+  case '1':
+  applicationTableView('DIE/forwaded.html');
+  break;
+  case '2':
+   applicationTableView('DIE/processed.html');
+  break;
+  case '3':
+   applicationTableView('CIO/cleared_ETC.html');
+  break;
+  case '4':
+  applicationTableView('CIO/closed.html');
+  break;
+  case '5':
+   applicationTableView('SDM/IncompleteData.html');
+  break;
+  case '6':
+  applicationTableView('SDM/pendingOriginals.html');
+ 
+  break;
+  case '909':
+  applicationTableView('DIE/all_status.html');
+  
+  break;
+ // default:
+ // alert('case default 7');
+  }
+
+}
+
+
+
+</script>
+
+
+
+<div id="loadDiv">
+  <p class="rcmsTitle2">Case Explorer</p>
+  
+  <table width="100%" border="0">
+    <tr>
+      <td width="163">SDM No </td>
+      <td><select name="select">
+	  <option>-Select SDM-</option>
+      </select>      </td>
+      <td>Case Tracking No </td>
+      <td><input type="text" name="textfield" /></td>
+    </tr>
+    <tr >
+      <td width="163">Passport No </td>
+      <td width="172"><input type="text" name="textfield2" /></td>
+      <td width="172">Name</td>
+      <td width="172"><input type="text" name="textfield23" /></td>
+    </tr>
+    <tr>
+      <td>Submited Date </td>
+      <td><input type="text" name="textfield22" /></td>
+      <td>Status</td>
+      <td><select name="statusID" id="statusID">
+        <option value="909">-All-</option>
+        <option value="0">New Application</option>
+        <option value="1">Forwarded</option>
+        <option  value="2">Processed</option>
+        <option  value="3">Cleared-ETC</option>
+        <option  value="4">Closed</option>
+        <option  value="5">Incomplete Data</option>
+        <option  value="6">Pending Originals </option>
+      </select></td>
+    </tr>
+    
+    <tr>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td><input type="submit" name="Submit" value="Search" onclick="showExploreResult();showDtl()"/>
+      <input type="submit" name="Submit2" value="New Case" onclick="loadContainer('treeItems/caseCreation.html');"/></td>
+    </tr>
+  </table>
+ 
+ 
+  <div id="previewDiv">
+  
+  
+  </div>
+  
+  
+  
+  <table width="344" border="0">
+    <tr>
+      <td width="25" bgcolor="#FF99FF">&nbsp;</td>
+      <td width="137">New Application</td>
+      <td width="19" bgcolor="#FFCCCC">&nbsp;</td>
+      <td width="145">Closed</td>
+    </tr>
+    <tr>
+      <td bgcolor="#FFCC33">&nbsp;</td>
+      <td>Forwaded</td>
+      <td bgcolor="#FF0000">&nbsp;</td>
+      <td>Incomplete Data</td>
+    </tr>
+    <tr>
+      <td bgcolor="#FFFF00">&nbsp;</td>
+      <td>Processed</td>
+      <td bgcolor="#FF7511">&nbsp;</td>
+      <td>Pending Originals</td>
+    </tr>
+    <tr>
+      <td height="21" bgcolor="#33FF99">&nbsp;</td>
+      <td>Cleared-ETC</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    </tr>
+  </table>
+</div>

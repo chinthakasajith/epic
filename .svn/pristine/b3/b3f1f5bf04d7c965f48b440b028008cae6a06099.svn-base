@@ -1,0 +1,306 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.system.util.variable;
+
+/**
+ *
+ * @author upul
+ */
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+public class PageVarList {
+
+    public static final String DEFAULTPAGE = "DEFAULT";//to set login Audittrace
+    //switch control-->system message-->pages
+    public static final String VIEWALERT = "SCSMVA";
+    public static final String FAILALERT = "SCSMFA";
+    //switch control-->server configuration-->pages
+    public static final String SERVERMAINCONFIG = "SCSCSC"; //server main config
+    public static final String PAGE = "PAGE";
+    public static final String SECTION = "ADSUSC";
+    public static final String FEEPROFILE = "ADPMFP";
+    public static final String FEEMGT = "ADTRFM";
+    public static final String CREDITSCORERULEDEF = "CMACCR";//CR-for credit score rule
+    public static final String CREDITSCORE = "CMACCF";//CS-for credit score
+    public static final String SECTIONPAGE = "ADSUSP";
+    public static final String HOLIDAYMGT = "ADSCHM";
+    public static final String CARDNUMBERGENE = "ADSCNG";
+    public static final String TASK = "ADSUTK";//Task Management
+    public static final String USERROLE = "ADSUUR";
+    public static final String USERLEVEL = "ADSUUL";//Level Management
+    public static final String PAYMENTPLAN = "BOIPPP";//Payment Plan
+    public static final String BTPAYMENTPLAN = "BOIPBT";//Payment Plan
+    public static final String SYSTEMUSER = "ADSUSU";
+    public static final String SYSTEMAUDIT = "ADSUAU";
+    public static final String PASSRESET = "ADSUPR";
+    public static final String USERPRIVILEGE = "ADSUUP";
+    public static final String APPLICATIONMGT = "ADSUAM";
+    public static final String PASSWORDPOLICY = "ADSCPS";
+    public static final String EXCHANGERATE = "ADTREX";
+    public static final String DEBITCARDHOME = "ADTPDB";//debit card template
+    public static final String CARDTEMPLATEHOME = "ADTPCR";//card template
+    public static final String CARDDOMAINHOME = "ADTPDM";//card domain template
+    public static final String COUNTRY = "ADTRCO";
+    public static final String CURRENCY = "ADTRCR";//Currency
+    public static final String TEMPLATE = "ADTPTM";
+    public static final String CUSTEMPLATE = "ADTPCG"; // customer template
+    public static final String ACCTEMPLATE = "ADTPAT"; // account template
+    public static final String POSTALCODE = "ADTRPC";//Postal Code
+    public static final String INTERESTPROFILE = "ADPMIP";//Interest Profile
+    public static final String CAMMDATAASSIGN = "CMAAAD";//Card application assigning home
+    public static final String DEBITAPPASSIGN = "CMAADA";//debit Card application assigning home
+    public static final String DATAASSIGNUPDATE = "CMAAUA";//Card application assigning update home
+    public static final String DEBITASSIGNUPDATE = "CMAADU";//debit Card application assigning update home
+    public static final String USERDATACAPTURE = "CMDCUA";//user assigned applications homeCMDCUA
+    public static final String DEBITDATACAPTURE = "CDCDDC";//user assigned debit card application search home
+    public static final String CREDISCOREFIELDDIF = "CMACCF";//credit score field id
+    public static final String SCORECARD = "CMACCS";//card score 
+    public static final String CALCULATECREDITSCORE = "CMACCC";//card score 
+    public static final String CARDPRODUCT = "ADSCCP";//card template
+    public static final String CARDPBIN = "ADSCCB";//card template
+    public static final String CREDITSCORING = "CMACCI";//Credit score
+    public static final String DOCUMENTVERIFYHOME = "CMDVHO";//document verify home
+    public static final String DEBITVERIFYHOME = "CMDEVE";//debit verify home
+    public static final String BULKVERIFYHOME = "CMBLVE";//debit verify home
+     
+    // CAMM --->Application Verification----->Coporate Verification
+    public static final String CORPORATE_CARD_VERIFICATION = "CMAVCV";
+    
+    public static final String APPSEARCH = "CDCHSH";//application Search
+    public static final String APPMODIFY = "CDCDAM";//application modify
+    public static final String DOCUMENTTYPEMGT = "ADSCDT";//Document type mgt 
+    public static final String CREDITCONFIRMSCEMAMGT = "ICAPCS";//credit confirmation schema mgt
+    public static final String CREDITOFFICER = "CDCNCO";//Credit officer confirmation
+    public static final String CREDITOFFICERREVIEWANDCONFIRM = "CORACO";//Credit officer review and confirmation
+    public static final String APPLICATONAPPROVE = "CDCNAP";//Application confirmation
+    public static final String DEBITAPPLICATONAPPROVE = "CDDBAP"; //debit card confirmation
+    public static final String BANKBRANCH = "ADSCBB";//Application confirmation
+    public static final String NUMBERGEN = "CDNGNG";//Application credit number genaration
+    public static final String DEBIT_NUMBERGEN = "CPNGDC";//Application debit number genaration
+    public static final String CARDTYPEMGT = "ADSCCT";//Application confirmation
+    public static final String CREDITRECOMMAN = "ADSCCR";
+    public static final String COMMONFILEDOWNLOAD = "ADSCFD";//common file download
+    public static final String RISKPROFILE = "ADPMRP";
+    public static final String BANK = "ADSCBM"; //bank management
+    public static final String LETTERTEMPLATE = "ADSCLT"; //letter template mgt
+    public static final String BASE_CONFIG = "ADSCOC"; // base congiguration
+    public static final String EMBOSSFILEFORMAT = "ADSCFM"; //emboss file format
+    public static final String HOTLISTREASON = "ADSCHR";    //hot list reason
+    public static final String SERVERDETAILS = "SCSDSD";    //server details 
+    public static final String AQUIREBIN = "ADSCAB";    //Aquire Bin Management
+    public static final String TRANSACTIONPROFILE = "ADPMTP";   //Transaction Profile Management
+    public static final String BILLINGSTATEMENTPROFILE = "ADPMBS"; //Billing Statement Profile Management
+    public static final String APPREJECT = "ADSCAR";//application reject reason
+    public static final String CPCECE = "CPCECE";//credit card embossing page
+    public static final String DEBIT_EMBOSS = "CPDEDE";//debit card embossing page
+    public static final String BULK_EMBOSS = "CPBEBE";//bulk card embossing page
+    public static final String TXNTYPE = "ADTRTT"; //Transaction Type 
+    public static final String CHANNEL = "SCCCCC"; // Channel Config
+    public static final String CHANNELADMINMESSAGE = "SCCHAM"; // Channel Admin Messages
+    public static final String LISTENER = "SCLCLC"; // Listener Config
+    public static final String LOGMGT = "SCLMLM"; // Log Management
+    public static final String RESPONCE_CODE_MGT = "SCRMRC"; // Responce Code Management
+    public static final String RESPONCE_CODE_MAPPING = "SCRMRM"; // Responce Code Mapping
+    public static final String MERCHANT_CUSTOMER = "MTMMMC"; // Merchant Customer Management
+    public static final String MERCHANT_LOCATION = "MTMMML"; // Merchant Location Management
+    //key Management
+    public static final String VISA_KEY_MGT = "SCKMVS";//visa key management
+    public static final String MASTER_KEY_MGT = "SCKMMS";//visa key management
+    public static final String VISA_PLUS_KEY_MGT = "SCKMVP";//visa plus key management
+    public static final String MAESTRO_KEY_MGT = "SCKMME";//Maestro key management
+    public static final String AMEX_KEY_MGT = "SCKMAM";//visa plus key management
+    public static final String MERCHANTCC = "ADTRMC";//merchant category code
+    public static final String ATM_KEY_MGT = "SCKMAT";//ATM key management
+    public static final String SW_KEY_MGT = "SCKMSW";//Switch key management
+    public static final String TRMINAL_MGT = "MTTMTD";//terminal data capture
+    public static final String TRMINAL_ALLOCATION_DEALLOCATION = "MTTMAL";//terminal allocation and deallocation
+    public static final String TRMINAL_ACTIVATION_DEACTIVATION = "MTTMAD";//terminal ACTIVATION and deaCTIVATION
+    public static final String SERVER_DETAILS = "SCSDSD";//Switch key management
+    public static final String BILLING_CYCLE_MGT = "ADSCBC";//billing cycle management
+    public static final String PINGENERATIONANDMAIL = "CPPGPM";//pin generation 
+    public static final String DEBITPINGENERATION = "CPPGDP";//debit pin generation 
+    public static final String PINMAIL = "CPPMPM";//pin mail
+    public static final String DEBIT_PINMAIL = "CPPMDP";//debit pin mail
+    public static final String SECURITY_QUES_MGT = "ADSQSQ";//security question management
+    public static final String ACQ_SECURITY_QUES_MGT = "ADSQAQ";//acquire security question management
+    public static final String CURRENCY_EXCHANGE_RATE = "ADTRCE";//Currency Exchange Rate
+    public static final String CALL_CENTER_HISTORY = "RECHCH";//call senter history
+    public static final String TXN_EXP = "RETETE";//transaction explorer
+    public static final String SERVICE_CODE = "ADSCSC"; // service code management
+    public static final String CARD_PIN_DISTRIBUTION = "CPCDCD"; // Credit card and Pin Distribution
+    public static final String BULK_CARD_PIN_DISTRIBUTION = "CPCDBC"; // Bulk card and Pin Distribution
+    public static final String COMMUNICATION_KEYS = "SCKMKM"; // Bulk card and Pin Distribution
+    public static final String CHANNEL_KEY_MAILING = "SWCCKM"; // Channel Key Mailing
+    //call center pages
+    public static final String CALLCENTERSEARCH = "CCCCSH"; //call center search
+    public static final String AQCALLCENTERSEARCH = "ACCCSH"; //call center search
+    public static final String CALLCENTER_TERMINAL_UPDATE = "ACTMTU"; // merchant update
+    public static final String CALLCENTER_TERMINAL_ALLOCATION = "ACTMTA"; // merchant update
+    public static final String CALLCENTER_TERMINAL_DEALLOCATION = "ACTMTD";
+    public static final String CALLCENTER_TERMINAL_ACTIVATION = "ACTMAT";
+    public static final String CALLCENTER_TERMINAL_DEACTIVATION = "ACTMDT";
+    public static final String CALLCENTER_TERMINAL_BLOCK = "ACTMTB";
+    public static final String CALLCENTER_MERCHANT_CUSTOMER_TXN_EXPLORER = "ACMCTE";
+    public static final String CALLCENTER_MERCHANT_LOCATION_TXN_EXPLORER = "ACMLTE";
+    public static final String CALLCENTER_MERCHANT_TERMINAL_TXN_EXPLORER = "ACMTTE";
+    public static final String CALLCENTER_MERCHANT_CUSTOMER_UPDATE = "ACMCUP";
+    public static final String CALLCENTER_MERCHANT_LOCATION_UPDATE = "ACMLUP";
+    
+    public static final String CALLCENTER_SALE_TRANSACTION = "ACMLST";
+    public static final String CALLCENTER_CASH_ADVANCED_TRANSACTION = "ACMLCT";
+    public static final String CALLCENTER_VOID_TRANSACTION = "ACMLVT";
+    public static final String CALLCENTER_SETTLEMENT_TRANSACTION = "ACMLLT";
+    
+    
+    //call center-->card-->pages
+    public static final String CARDBLOCK = "CCCDCB"; //Card Block
+    public static final String CARDREQUEST = "CCCDCR";// Card Request
+    public static final String CARDCLOSE = "CCCDCC";
+    public static final String CARD_ACTIVATION = "CCCDCA"; // card activate
+    public static final String CARD_CHANGE_REQ = "CCCDCH"; // Card Change Request
+    public static final String PERM_LIMIT_INC_REQ = "CCCPLI"; // permanent card limit increment Request
+    public static final String CARD_ONLINE_BALANCE = "CCCDOB";  // view online balance
+    public static final String CARD_CHANGE_APPROVE = "CPRCCR";
+    public static final String EASY_PAYMENT_REQUEST = "CCCOER";//easy payment request
+    public static final String BALANCE_TRANSFER_PAYMENT_REQUEST = "CCCOBT";
+    public static final String LOADONCARD_REQUEST = "CCCOLC";//easy payment request
+    // call center --> customer-->pages
+    public static final String CUSTOMER_TRANSACTION = "CCCUTM";
+    public static final String CUSTOMER_CHANGE_CONTACT_DETAILS = "ADANDCON";
+    
+    
+    // call center --> account-->pages
+    public static final String ACCOUNT_TRANSACTION = "CCACTM";
+    // call center --> card-->pages
+    public static final String CARD_TRANSACTION = "CCCDTM";
+    //card personalization-->request confirmation-->pages
+    public static final String REQUESTAPPROVE = "CPRCRA";//Request Approve
+    public static final String CUSCONTACTCHANGEREQUESTAPPROVE = "CSDCRA";//Request Approve
+    
+    public static final String CARD_QUALITY_MGT = "CPCEQM"; // Card Quality Mgt
+    public static final String BULKCARD_QUALITY_MGT = "CPBCQM"; // Bulk Card Quality Mgt
+    //back office-->Increment-->pages
+    public static final String TEMP_CARD_INCREMANT = "BOLITI"; // Temporary credit & cash incremant
+    public static final String CARD_RENEW = "BOCRNW";   //card renew
+    public static final String APPROVE_PERM_LIMIT_INC = "BOCPLI";   // approve permanent card limit increment
+    public static final String APPROVE_TEMP_LIMIT_INC = "BOCTLI";   // approve temporary card limit increment
+    public static final String APPROVE_EASY_PAYMENT = "BOIPEP";   // approve temporary card limit increment
+    public static final String APPROVE_BT_PAYMENT = "BOIPBC";   // approve temporary card limit increment
+    public static final String EOC_FILE_GENE = "BOEFFG"; // EOD file generation
+    public static final String EOD_PROCESS_CATEGORY = "BOPMPC";
+    public static final String CARD_STADING_ORDER = "BOCSSO";
+    // bulk card Mgt
+    public static final String BULK_CARD_NUMBER_GENERATION = "PRPRNG"; // Bulk Card Number Generation
+    public static final String BULK_CD_REQ = "PRPRCR";//Bulk Card Request
+    public static final String BULK_CD_CONFIRM = "PRPRBC";//Bulk Card Confirmation
+    public static final String BULK_PIN_GENERATION = "CPBCPG";//bulk pin generation
+    public static final String BULK_PIN_MAIL = "CPBCPM";//bulk pin mail
+    //back office-->EOD process-->pages
+    public static final String EOD_PROCESS = "BOEDPM";//EOD process management
+    public static final String EOD_PROCESS_CATEGORY_FLOW = "BOEDCF";//EOD process category flow management
+    // Switch Control --> Key Mailer
+    public static final String KEY_MAILER = "SCLKKM";
+    public static final String EOD_PROCESS_FLOW = "BOEDPF";//EOD process flow management
+    //administration --> txn management --> pages
+    public static final String ACQUIRE_TXN_TYPE = "ADTRAT";//Acquire Transaction Type Mgt
+    public static final String CHANNEL_TXN = "ADTRCT";//Channel Transaction Mgt
+    public static final String LISTEN_TXN = "ADTRLT";//Listener Transaction Mgt
+    public static final String COMMISSION_PROFILE = "COMPRF"; // Commission profile
+    public static final String MRCHNT_STATEMENT_CYCLE_MGT = "ADSCMS";//billing cycle management
+    //back office-->general ledger manager-->
+    public static final String GL_MANAGER = "BOGLGL"; // general ledger manager
+    public static final String ASSIGN_TXN_TO_GL = "BOGLAT"; // assign txn types to gl account
+    public static final String MERCHANT_PAYMENT_CYCLE = "ADCMPC";
+    public static final String SALE_TRANSACTION = "MTMTST";
+    public static final String VOID_TRANSACTION = "MTMTVT";
+    public static final String SETTLEMENT_TRANSACTION = "MTMTLT";
+    public static final String CASH_ADVANCED_TRANSACTION = "MTMTCT";
+    public static final String APPLICATION_DETAILS_RPT = "REARAD";
+    public static final String APPLICATION_CREDIT_SCORE_BREAKDOWN_RPT = "REARAC";
+    public static final String APPLICATION_SUMMARY = "REARAS";//Application Summary Report
+    public static final String APPLICATION_DATA_ENTRY = "REARDE";//Application Data Entry Report
+    public static final String APPLICATION_REJECT = "REARAR";//Application Reject Report
+    public static final String INCOMING_FILE_UPLOAD = "BOIFFU";//Incoming File Upload
+    public static final String PIN_GEN_AND_MAIL = "REPGPM";//Pin Generation & Mailing
+    public static final String CARD_DISTRIBUTION_REPORT = "REARDR"; // Card distribution report
+    public static final String BULK_CARD_DATA_CAPTURE = "CMCDBD";
+    public static final String NUMBER_GENERATION_RPT = "REARNR";// Number generation report
+    public static final String ACTIVATED_CARD_RPT = "REARCR";// Number generation report
+    public static final String EOD_TRANSACTION_RPT = "REERET";// EOD transaction report
+    public static final String EMBOSS_ENCODE_CD = "REAREE";//Emboss and Encode Card Report
+    public static final String TERMINAL_RPT = "RETRTR";//Terminal Report
+    public static final String CD_STATUS = "REARCS";//Card Status Report
+    public static final String APPLICATION_VERIFICATION_RPT = "REARAV";
+    public static final String ONLINE_CARD_INFO = "RECROC";//ONLINE CARD INFO REPORT
+    public static final String MERCHANT_CUS_REPORT = "REMRMC";//MERCHANT CUSTOMER REPORT
+    public static final String COMMON_CONFIG = "ADCMCC";//Common Configuration Page
+    public static final String CIRRUS_KEY_MGT = "SCKMCK";
+    public static final String CREDIT_PROPR_KEY_MGT = "SCKMCPK";
+    public static final String MERCHANT_LOC_REPORT = "REMRML";
+    public static final String LOG_VIEWER = "BOLMLV";
+    public static final String CARD_ATM_KEY_MANAGMENT = "SWCCAT";
+    public static final String CARD_KEY_MANAGMENT = "SCKMCM";
+    //back office-->manual adjustment-->
+    public static final String CARD_TXN_ADJUSTMENT = "BOMACA";
+    public static final String CARD_TXN_ADJUSTMENT_CONFIRM = "BOMACT";
+    public static final String MERCHANT_TXN_ADJUSTMENT = "BOMAMA";
+    public static final String STANDING_ORDER_TYPES = "ADSCST";//standing order type management
+    public static final String FILE_TYPE = "BOEDFT"; //File Management
+    public static final String FILE_INFO = "BOEDFI";
+    public static final String TERMINAL_MANUFACTURE = "ADSCTM"; //Terminal Manufacture
+    public static final String TERMINAL_MODEL = "ADSCMM"; //Terminal Model
+    public static final String AREA_MGT = "ADSCAM";  //Area Management
+    public static final String LISTNER_KEY_MAILING = "SWLCKM";  //Listner key mailing
+    //Bin Management
+    public static final String BIN_MGT = "ADSCBN";
+    //Limit Exceeded Report
+    public static final String LIMIT_EXCEED_REPORT = "RECRLE";
+    
+    //Letter Generation
+    public static final String LETTER_GEN = "BOLGLF";
+    //back office-->Payment-->Batch Management
+    public static final String BATCH_MANAGEMENT = "BOPABM";
+
+    //Back Office--->Payment----->
+    public static final String BO_PAYMENT = "BOPAPA";
+    public static final String BO_PAY_CHEQUE_REALISE = "BOPACR";
+   
+    
+
+    public static final String CORPORATEASSIGN = "CMAACA";
+    public static final String CORPORATEASSIGNDATAUPDATE = "CMAACO";
+    
+    
+
+
+
+    //Card Management-->Corporate Customer
+    public static final String CO_CUSTOMER = "ADCCC";
+    
+
+    public static final String CORPORATE_CARD_DATA = "CMCDCD";
+    public static final String CASE_MANAGEMENT = "ADCCCM";
+    public static final String RECOVERY_CALL_CENTER = "RMCCCS";
+    
+    public static final String LADDER_MANAGEMENT = "ADCCLM";
+    public static final String QUEUE_MANAGEMENT = "ADCCQM";
+    public static final String COLLECTION_ASSIGNMENT = "RMCCCA";
+    
+    //Alert Management (Email or SMS)
+    public static final String ALERT_MANAGEMENT = "ADSCAC";
+    
+    //Template Management -> Email Template
+    public static final String EMAILHOME = "ICTMET";
+    
+    //Template Management -> SMS Template
+    public static final String SMSTEMPLATE = "ICTMST";
+    
+    //Template Management -> Letter Template
+    public static final String LETTERHOME = "ICTMLT";
+    
+
+}

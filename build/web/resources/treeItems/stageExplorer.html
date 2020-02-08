@@ -1,0 +1,139 @@
+<style type="text/css">
+#loadDiv{
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: X-small;
+}
+
+#colorDiv{
+	display: inline;
+	width: 300px;
+}
+</style>
+<script type="text/javascript">
+$(document).ready(function (){
+//$('#previewDiv').hide();
+
+});
+
+
+function showDtl(){
+$('#previewDiv').show();
+
+}
+
+
+
+
+
+function applicationTableView(url){
+
+$('#previewDiv').load(url);
+}
+
+
+
+
+
+function showExploreResult(){
+var st = $('#statusID').val();
+
+ applicationTableView('DIE/stages.html');
+/*
+
+switch(st)
+{
+  case '0':
+  applicationTableView('DIE/new.html');
+  break;
+  case '1':
+  applicationTableView('DIE/forwaded.html');
+  break;
+  case '2':
+   applicationTableView('DIE/processed.html');
+  break;
+  case '3':
+   applicationTableView('CIO/cleared_ETC.html');
+  break;
+  case '4':
+  applicationTableView('CIO/ETC.html');
+  break;
+  case '5':
+   applicationTableView('SDM/IncompleteData.html');
+  break;
+  case '6':
+  applicationTableView('SDM/pendingOriginals.html');
+ 
+  break;
+  case '909':
+  applicationTableView('DIE/all_status.html');
+  
+  break;
+ // default:
+ // alert('case default 7');
+  }
+
+
+*/
+}
+
+
+
+</script>
+
+
+
+<div id="loadDiv">
+  <p class="rcmsTitle2">Stage Explorer</p>
+  
+  <table width="696" border="0">
+    <tr>
+      <td width="163">SDM No </td>
+      <td><input type="text" name="textfield3" /></td>
+      <td width="347" rowspan="6">
+	
+	  </td>
+    </tr>
+    <tr >
+      <td width="163">Case Tracking No </td>
+      <td width="172"><input type="text" name="textfield" /></td>
+    </tr>
+    <tr>
+      <td>Passport No </td>
+      <td><input type="text" name="textfield2" /></td>
+    </tr>
+    <tr>
+      <td>Submited Date </td>
+      <td><input type="text" name="textfield22" /></td>
+    </tr>
+    <tr>
+      <td>Name</td>
+      <td><input type="text" name="textfield23" /></td>
+    </tr>
+    <tr>
+      <td>Stages</td>
+      <td><select name="statusID" id="statusID">
+        <option value="909">-All-</option>
+        <option value="0">Passport Verify</option>
+        <option value="1">NIC Verify</option>
+        <option  value="2">Birth Certificate</option>
+        <option  value="3">Document Verify</option>
+        <option  value="4">Bio Data Verify</option>
+    
+      </select></td>
+    </tr>
+  </table>
+  <div id="colorDiv">
+  
+  </div>
+  
+  <p>
+    <input type="submit" name="Submit" value="Search" onclick="showExploreResult();showDtl()"/>
+  </p>
+  
+  <div id="previewDiv">
+  
+  
+  </div>
+  
+  <p>&nbsp;</p>
+</div>

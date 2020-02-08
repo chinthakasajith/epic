@@ -1,0 +1,147 @@
+package com.epic.cms.backoffice.eodlettergeneration.persistance;
+
+import com.epic.cms.backoffice.eodlettergeneration.bean.CardRenewalBean;
+import com.epic.cms.backoffice.eodlettergeneration.bean.LetterGenerationBean;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ *
+ * @author jeevan
+ */
+public class SearchLetterGenerationPersistance {
+
+    ResultSet rs = null;
+    private List<CardRenewalBean> searchList = null;
+
+    public List<LetterGenerationBean> getProcessCategory(Connection cmsCon) throws SQLException, Exception {
+        List<LetterGenerationBean> procassList = new ArrayList<LetterGenerationBean>();
+        PreparedStatement ps = null;
+        String query;
+
+        query = "SELECT PROCESSID, DESCRIPTION FROM EODPROCESS WHERE LETTERGENARATIONSTATUS='YES' ORDER BY DESCRIPTION";
+
+        try {
+
+            ps = cmsCon.prepareStatement(query);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                LetterGenerationBean bean = new LetterGenerationBean();
+                bean.setProcessId(rs.getString("PROCESSID"));
+                bean.setProcessDescription(rs.getString("DESCRIPTION"));
+
+                procassList.add(bean);
+            }
+            return procassList;
+
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                    ps.close();
+                } catch (SQLException sqlEx) {
+                    throw sqlEx;
+                }
+            }
+        }
+    }
+
+    public List<CardRenewalBean> searchLetterGeneration(Connection cmsCon, CardRenewalBean searchBean) throws SQLException, Exception {
+        PreparedStatement ps = null;
+        String query = null;
+
+        searchList = new ArrayList<CardRenewalBean>();
+        try {
+
+            query = "SELECT CA.CARDNUMBER, CA.EXPIRYDATE, ST1.DESCRIPTION, CA.RENEWALCONFIRMATIONDATE, ST2.DESCRIPTION AS PINGENERATIONSTATUS, CA.LASTUPDATEDTIME ,CA.CREATEDDATE, CA.LETTERGENERATIONSTATUS "
+                    + " FROM CARDRENEW CA, STATUS ST1, STATUS ST2"
+                    + " WHERE CA.STATUS=ST1.STATUSCODE"
+                    + " AND LETTERGENERATIONSTATUS = 'NO' "
+                    + " AND ST2.STATUSCODE=CA.PINGENERATIONSTATUS ";
+
+            String condition = "";
+
+            if (!searchBean.getFromDate().contentEquals("") && !searchBean.getToDate().contentEquals("")) {
+                if (!condition.equals("")) {
+                    condition += " AND ";
+                }
+                condition += "CA.CREATEDDATE >= to_Date('" + this.stringToDate(searchBean.getFromDate()) + "','yy-mm-dd') AND CA.CREATEDDATE >= to_Date('" + this.stringToDate(searchBean.getToDate()) + "','yy-mm-dd')";
+            } else {
+                if (!searchBean.getFromDate().contentEquals("")) {
+                    if (!condition.equals("")) {
+                        condition += " AND ";
+                    }
+                    condition += "CA.CREATEDDATE >= to_Date('" + this.stringToDate(searchBean.getFromDate()) + "','yy-mm-dd')";
+                }
+                if (!searchBean.getToDate().contentEquals("")) {
+                    if (!condition.equals("")) {
+                        condition += " AND ";
+                    }
+                    condition += "CA.CREATEDDATE <= to_Date('" + this.stringToDate(searchBean.getToDate()) + "','yy-mm-dd')";
+                }
+            }
+
+
+            if (!condition.equals("")) {
+                query += "AND " + condition;
+            }
+
+            ps = cmsCon.prepareStatement(query);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CardRenewalBean bean = new CardRenewalBean();
+
+                bean.setCardNumber(rs.getString("CARDNUMBER"));
+                bean.setExpiryDate(rs.getString("EXPIRYDATE"));
+                bean.setStatus(rs.getString("DESCRIPTION"));
+                bean.setRenewalConfirmationDate(rs.getDate("RENEWALCONFIRMATIONDATE"));
+                bean.setPinGenerationStatus(rs.getString("PINGENERATIONSTATUS"));
+
+                bean.setFromDate(rs.getString("LASTUPDATEDTIME"));
+                bean.setToDate(rs.getString("LASTUPDATEDTIME"));
+                
+                bean.setLetterGenerationStatus(rs.getString("LETTERGENERATIONSTATUS"));
+                searchList.add(bean);
+
+            }
+            return searchList;
+
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                    ps.close();
+                } catch (SQLException sqlEx) {
+                    throw sqlEx;
+                }
+            }
+        }
+    }
+
+    private String stringToDate(String date) throws ParseException {
+        String dateString = date;
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        Date convertedDate = dateFormat.parse(dateString);
+
+        return (dateFormat.format(convertedDate));
+
+    }
+}

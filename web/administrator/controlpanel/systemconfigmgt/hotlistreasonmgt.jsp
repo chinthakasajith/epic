@@ -1,0 +1,376 @@
+<%-- 
+    Document   : hotlistreasonmgt
+    Created on : May 3, 2012, 10:47:34 AM
+    Author     : badrika
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<%@taglib  prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
+<%@page  import="com.epic.cms.system.util.variable.MessageVarList" %>
+<%@page  import="com.epic.cms.system.util.variable.PageVarList" %>
+
+<!DOCTYPE html>
+<html >
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <!--        include content.jsp for all js and css inclusion-->
+        <jsp:include page="/content.jsp"/>
+        <!--        include content.jsp for all js and css inclusion-->
+
+        <script type="text/javascript">
+            
+            function BackHotlistReasonForm(){
+                window.location = "${pageContext.request.contextPath}/LoadHotlistReasonMgtServlet";
+            }         
+                        
+            function viewHotlistReason(value){
+                window.location = "${pageContext.request.contextPath}/ViewHotlistReasonMgtServlet?id="+value;
+            }
+            function updateHotlistReason(value){
+                document.viewTableForm.action="${pageContext.request.contextPath}/UpdateHotlistReasonMgtLoadServlet";           
+                document.getElementById('id').value=value;    
+                document.viewTableForm.submit();
+                // window.location = "${pageContext.request.contextPath}/UpdateHotlistReasonMgtLoadServlet?id="+value;
+            }
+            function deleteHotlistReason(value){
+             
+                answer = confirm("Do you really want to delete "+value+" Hotlist Reason?")
+                if (answer !=0)
+                {
+                    window.location="${pageContext.request.contextPath}/DeleteHotlistReasonMgtServlet?id="+value;
+                }
+                else
+                {
+                    window.location="${pageContext.request.contextPath}/LoadHotlistReasonMgtServlet";
+                }
+
+            }
+        </script>
+        <script>
+            function settitle(){
+        
+                        $.post("${pageContext.request.contextPath}/SetNavigationTitleServlet",
+                { pagecode:'<%= PageVarList.HOTLISTREASON%>'                                  
+                },
+                function(data) {
+                    
+                    if(data!=''){
+                        $('.center').text(data)              
+                        var heading = data.split('→');
+                        $('.heading').text(heading[1]) ;
+                                           
+                    }
+                                      
+                                        
+                });
+                
+            }
+                             
+        </script>  
+
+    </head>
+    <body>
+        <c:if test="${sessionScope.SessionObject==null}">
+            <c:redirect url="/administrator/controlpanel/login/login.jsp"/>
+        </c:if>
+
+        <div class="container" >
+
+            <div class="header">
+                <!--                <font size="20" color="FFFFFF" style="font: bold">  Card Management System </font>-->
+
+            </div>
+
+
+            <div class="main" >
+                <jsp:include page="/subheader.jsp"/>
+
+
+
+                <div class="content" >
+
+                    <td class="menubar"><jsp:include page="/leftmenu.jsp"/></td>
+
+                </div>
+
+
+                <div id="content1" >
+                    <div id="content" align="center">
+                        <div id="contenttext">
+                            <div class="bodytext" style="padding:12px;" align="left">
+
+                                <!--  ----------------------start  developer area  -----------------------------------    -->
+
+                                <table class="tit"> <tr> <td   class="heading"> </td> </tr></table>
+                                <script> settitle();</script>
+                                <table>
+                                    <tr>
+                                        <td style="width:300px"><font color="#FF0000"><b><c:out value="${errorMsg}"></c:out></b></font>
+                                            <font color="green"><b><c:out value="${successMsg}"></c:out></b></font>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                <c:if test="${operationtype=='add'}" >
+                                    <form method="POST" action="${pageContext.request.contextPath}/AddHotlistReasonMgtServlet">
+                                        <table border="0">
+
+
+                                            <tbody>
+                                                <tr>
+                                                    <td>Reason Code </td>
+                                                    <td><font style="color: red;">*</font></td>
+                                                    <td><input type="text" maxlength="6" name="reasonCode" value="${reasonBean.reasonCode}" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Description</td>
+                                                    <td><font style="color: red;">*</font></td>
+                                                    <td><input type="text" name="description" maxlength="64" value="${reasonBean.description}" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Status </td>
+                                                    <td><font style="color: red;">*</font></td>
+                                                    <td>
+                                                        <select  name="statusdes"  class="inputfield-mandatory">
+                                                            <option value="" selected>--SELECT--</option>
+                                                            <c:forEach var="status" items="${sessionScope.SessionObject.statusList}">
+
+                                                                <c:if test="${reasonBean.statusDes==status.statusCode}">
+                                                                    <option value="${status.statusCode}" selected>${status.description}</option>
+                                                                </c:if>
+                                                                <c:if test="${reasonBean.statusDes!=status.statusCode}">
+                                                                    <option value="${status.statusCode}">${status.description}</option>
+
+                                                                </c:if>
+
+
+                                                            </c:forEach>
+                                                        </select>
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+
+                                                </tr>
+
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td style="width: 300px;"> 
+                                                        <input type="submit" value="Add" name="Add" class="defbutton"/>
+                                                        <input onclick="BackHotlistReasonForm()" type="reset" value="Reset" class="defbutton"/>
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+
+                                    </form>
+                                </c:if>
+
+
+                                <c:if test="${operationtype=='update'}" >
+                                    <form method="POST" action="${pageContext.request.contextPath}/UpdateHotlistReasonMgtServlet">
+                                        <table border="0">
+
+
+                                            <tbody>
+                                                <tr>
+                                                    <td>Reason Code </td>
+                                                    <td><font style="color: red;">*</font></td>
+                                                    <td><input type="text" readonly="true" name="reasonCode" value="${reasonBean.reasonCode}" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Description</td>
+                                                    <td><font style="color: red;">*</font></td>
+                                                    <td><input type="text" name="description" maxlength="64" value="${reasonBean.description}" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Status </td>
+                                                    <td><font style="color: red;">*</font></td>
+                                                    <td>
+                                                        <select  name="statusdes"  class="inputfield-mandatory">
+                                                            <option value="" selected>--SELECT--</option>
+                                                            <c:forEach var="status" items="${sessionScope.SessionObject.statusList}">
+
+                                                                <c:if test="${reasonBean.statusDes==status.statusCode}">
+                                                                    <option value="${status.statusCode}" selected>${status.description}</option>
+                                                                </c:if>
+                                                                <c:if test="${reasonBean.statusDes!=status.statusCode}">
+                                                                    <option value="${status.statusCode}">${status.description}</option>
+
+                                                                </c:if>
+
+                                                            </c:forEach>
+                                                        </select>
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><input type="hidden" name="oldvalue" value="${oldval}" /></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+
+                                        <table>
+                                            <tr>
+                                                <td style="width: 95px;"></td>
+                                                <td><input type="submit" value="Update" name="Update" class="defbutton"/></td>
+                                                <td><input onclick="updateHotlistReason('${reasonBean.reasonCode}')" type="reset" value="Reset" class="defbutton"/></td>
+                                                <td><input onclick="BackHotlistReasonForm()" type="reset" value="Back" class="defbutton"/></td>
+                                            </tr>
+                                        </table>
+
+                                    </form>
+                                </c:if>
+
+
+                                <c:if test="${operationtype=='view'}" >
+                                    <form method="POST" action="${pageContext.request.contextPath}/ViewHotlistReasonMgtServlet">
+                                        <table border="0">
+
+
+                                            <tbody>
+                                                <tr>
+                                                    <td>Reason Code </td>
+                                                    <td></td>
+                                                    <td>:${reasonBean.reasonCode}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Description</td>
+                                                    <td></td>
+                                                    <td>:${reasonBean.description}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Status </td>
+                                                    <td></td>                                         
+                                                    <td>:${reasonBean.status}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+
+
+
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td style="width: 300px;">
+                                                        <input type="button" value="Back" name="Back" class="defbutton" onclick="BackHotlistReasonForm()"/>
+                                                    </td>
+
+                                                </tr>
+
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+
+
+                                            </tbody>
+                                        </table>
+
+                                    </form>
+                                </c:if>
+
+
+                                <!-- show table data -->
+                                <br/>
+                                <form name="viewTableForm" id="viewTableForm" method="post">
+                                    <table border="1" class="display" id="tableview">
+                                        <thead>
+                                            <tr>
+                                                <th>Reason Code</th>
+                                                <th>Description</th>
+                                                <th>Status</th>
+                                                <th>Last Updated Time</th>
+                                                <th>View</th>
+                                                <th>Update</th>              
+                                                <th>Delete</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach  items="${reasonList}" var="Rlist">
+                                                <tr>
+                                                    <td>${Rlist.reasonCode}</td>
+                                                    <td>${Rlist.description}</td>
+                                                    <td>${Rlist.statusDes}</td>
+                                                    <td>${Rlist.lastUpdatedTime}</td>
+
+                                                    <td><a  href='#' onclick="viewHotlistReason('${Rlist.reasonCode}')">View</a></td>
+                                                    <td><a  href='#' onclick="updateHotlistReason('${Rlist.reasonCode}')">Update</a></td>
+                                                    <td><a  href='#' onclick="deleteHotlistReason('${Rlist.reasonCode}')">Delete</a></td>
+
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                        <input type="hidden" id="id"  name="id" maxlength="16" />
+                                    </table>
+
+                                </form>
+
+
+
+
+                                <!--   ------------------------- end developer area  --------------------------------  -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearer"><span></span></div>
+            </div>
+
+        </div>
+        <div class="footer"><jsp:include page="/footer.jsp"/></div>
+    </body>
+</html>
+

@@ -1,0 +1,320 @@
+<html>
+<style type="text/css">
+.style2 {font-size: x-small}
+body,td,th {
+	font-size: small;
+}
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+
+
+.rcmsTextBox{
+	border: thin solid #00CCFF;
+}
+
+.rcmsTextBox:hover{
+border: thin solid #FF9900;
+}
+
+
+#msgDiv {
+	border: medium solid #CCCCCC;
+	height: 150px;
+	width: 450px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+
+
+
+
+
+.style3 {font-family: "Courier New", Courier, monospace}
+.style4 {font-size: small}
+.style6 {
+	font-size: x-small;
+	font-style: italic;
+	font-weight: bold;
+}
+</style>
+
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+$('#msgDiv').hide();
+});
+
+
+
+</script>
+
+
+
+
+<div id="Step1">
+  <table width="650" border="0">
+  <tr>
+    <td><span class="style6">Biographical Data of Applicant </span></td>
+    <td >&nbsp;</td>
+	   <td >&nbsp;</td>
+	      <td >&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="202">Case Tracking No </td>
+    <td width="152"><input type="text" name="textfield" class="rcmsTextBox" readonly="true" value="CTN02222001440"></td>
+    <td width="144">&nbsp;</td>
+    <td width="134">&nbsp;</td>
+  </tr>
+  <tr>
+    <td>National Identity Card Number</td>
+    <td><input type="text" name="textfield2" class="rcmsTextBox"></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Surname</td>
+    <td colspan="2"><input type="text" name="textfield232" class="rcmsTextBox" size="45"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Names other than surnames</td>
+    <td colspan="2"><input type="text" name="textfield23" class="rcmsTextBox" size="45"></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Permanent address</td>
+    <td colspan="2"><textarea name="textarea" cols="35"></textarea></td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>District</td>
+    <td><input type="text" name="textfield25" class="rcmsTextBox" ></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Date of birth</td>
+    <td colspan="3">Year
+	
+	
+	
+      <select name="year" id="yeadID">
+        <option value="y1">1985</option>
+        <option value="y2">1986</option>
+        <option value="y3">1987</option>
+        <option value="y4">1988</option>
+        <option value="y5">1989</option>
+      </select>
+    Month 
+    <select name="month">
+      <option value="m1">January</option>
+      <option value="m2">February</option>
+      <option value="m3">March</option>
+      <option value="m4">April</option>
+      <option value="m5">May</option>
+      <option value="m6">June</option>
+      <option value="m7">July</option>
+      <option value="m8">August</option>
+      <option value="m9">September</option>
+      <option value="m10">October</option>
+      <option value="m11">November</option>
+      <option value="m12">December</option>
+    </select>
+    Date
+    <select name="date">
+      <option value="d1">1</option>
+      <option value="d2">2</option>
+      <option value="d3">3</option>
+      <option value="d4">4</option>
+      <option value="d5">5</option>
+      <option value="d6">6</option>
+      <option value="d7">7</option>
+      <option value="d8">8</option>
+      <option value="d9">9</option>
+      <option value="d10">10</option>
+      <option value="d11">11</option>
+      <option value="d12">12</option>
+      <option value="d13">13</option>
+      <option value="d14">14</option>
+      <option value="d15">15</option>
+      <option value="d16">16</option>
+      <option value="d17">17</option>
+      <option value="d18">18</option>
+      <option value="d19">19</option>
+      <option value="d20">20</option>
+      <option value="d21">21</option>
+      <option value="d22">22</option>
+      <option value="d23">23</option>
+      <option value="d24">24</option>
+      <option value="d25">25</option>
+      <option value="d26">26</option>
+      <option value="d27">27</option>
+      <option value="d28">28</option>
+      <option value="d29">29</option>
+      <option value="d30">30</option>
+      <option value="d31">31</option>
+    </select></td>
+  </tr>
+  <tr>
+    <td>Birth certificate number</td>
+    <td><input type="text" name="textfield22" class="rcmsTextBox"></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Place of birth</td>
+    <td><input type="text" name="textfield222" class="rcmsTextBox"></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Sex:</td>
+    <td><input type="radio" name="sex" value="male" />
+Male</td>
+    <td><input type="radio" name="sex" value="female" />
+Female</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+  <td>Civil status</td>
+    <td colspan="3"><input type="radio" name="civil" value="unmarr" />
+Unmarried
+<input type="radio" name="civil" value="marr" />
+Married
+<input type="radio" name="civil" value="widower" />
+Widower/Widow
+<input type="radio" name="civil" value="divorc" />
+Divorced</td>
+    </tr>
+  <tr>
+    <td>Profession</td>
+    <td><input type="text" name="textfield223" class="rcmsTextBox"></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Office telephone No</td>
+    <td><input type="text" name="textfield2232" class="rcmsTextBox"></td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Home telephone No</td>
+    <td><input type="text" name="textfield22322" class="rcmsTextBox"></td>
+    <td>Mobile phone No</td>
+    <td><input type="text" name="textfield223222" class="rcmsTextBox"></td>
+  </tr>
+  <tr>
+    <td>Email Address</td>
+    <td colspan="2"><input type="text" name="textfield233" class="rcmsTextBox" size="45"></td>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+
+</div>
+  
+
+   <div id="Step2">
+   
+  <table width="650" border="0">
+  
+
+  
+   <tr>
+     <td colspan="4"><span class="style2">
+       <input type="radio" name="reason" value="passport" />
+Loss of Passport
+<input type="radio" name="reason" value="criminal" />
+Criminal
+<input type="radio" name="reason" value="travelPurp" />
+Document for travel purposes
+<input type="radio" name="reason" value="visa" />
+Visa exceeded</span></td>
+    </tr>
+   <tr>
+     <td width="190">Officer's name</td>
+     <td width="180"><input type="text" name="textfield2232232" class="rcmsTextBox"></td>
+     <td width="112">&nbsp;</td>
+     <td width="150">&nbsp;</td>
+   </tr>
+   <tr>
+     <td>Designation</td>
+     <td><input type="text" name="textfield2232233" class="rcmsTextBox"></td>
+     <td><span class="style4">Office Tel No </span></td>
+     <td><input type="text" name="textfield2232235" class="rcmsTextBox"></td>
+   </tr>
+   <tr>
+     <td>Date of issue</td>
+     <td><input type="text" name="textfield2232234" class="rcmsTextBox"></td>
+     <td>Date of expiry</td>
+     <td><input type="text" name="textfield2232236" class="rcmsTextBox"></td>
+   </tr>
+   <tr>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td>Upload registered photograph</td>
+     <td colspan="2"><input type="file"/></td>
+      <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td>Upload copy of passport</td>
+     <td colspan="2"><input name="file" type="file"/></td>
+      <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td>Upload copy of birth certificate</td>
+     <td colspan="2"><input name="file2" type="file"/></td>
+      <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td >Upload copy of NIC</td><td colspan="3"><input name="file22" type="file"/></td> 
+    </tr>
+   <tr>
+     <td colspan="2">&nbsp;</td>
+     <td>&nbsp;</td>
+     <td>&nbsp;</td>
+   </tr>
+   <tr>
+     <td colspan="2"><input type="submit" name="Submit" value="Create Case" onClick=" showMessage()"></td>
+     <td>&nbsp;</td>
+	
+     <td><a href="#" onClick="hideStep('#Step2');showStep('#Step1')"></a></td>
+   </tr>
+   <tr>
+    <td colspan="2">&nbsp;</td>
+    <td>&nbsp;</td>
+    <td><a href="#" onClick="hideStep('#Step2');showStep('#Step1')"></a></td>
+  </tr>
+</table>
+</div>
+
+
+
+<div id="msgDiv">
+<p align="center" class="msgText style3" id="userPropmt"> New Readmission Case Created </p>
+<p align="center" class="msgText style3">Case Tracking No - CT002214754  </p>
+<p align="center" class="msgText style3">Information sent to Department of Immigration and Emigration </p>
+</div>
+
+
+
+
+
+</html>

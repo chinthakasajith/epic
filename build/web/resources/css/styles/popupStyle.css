@@ -1,0 +1,16 @@
+/* CSS Document */
+
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+
+#popUpcontainer{
+	width: 750px;
+	background-color: #FFFFFF;
+	margin-right: auto;
+	margin-left: auto;
+	border: thin solid #2C2C2C;
+}

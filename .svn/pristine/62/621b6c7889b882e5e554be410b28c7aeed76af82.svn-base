@@ -1,0 +1,108 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.epic.cms.callcenter.customer.bean;
+
+/**
+ *
+ * @author prageeth_s
+ */
+public class CustomerContactDetailsChngeHolderBean {
+    
+     private Boolean isPermanentAddressChanged;     
+     private Boolean isResidenceAddressChanged;
+     private Boolean isBillingAddressChanged; 
+     private Boolean isCompanyAddressChanged; 
+     private Boolean isResPhoneNoChanged; 
+     private Boolean isMobilePhoneNoChanged; 
+     private Boolean isOfficePhoneNoChanged; 
+     private Boolean isEstMobContactNoChanged; 
+     private Boolean isEstLandContactNoChanged; 
+     private Boolean isFaxNoChanged; 
+
+    public Boolean isPermanentAddressChanged() {
+        return isPermanentAddressChanged;
+    }
+
+    public void setIsPermanentAddressChanged(Boolean isPermanentAddressChanged) {
+        this.isPermanentAddressChanged = isPermanentAddressChanged;
+    }
+
+    public Boolean isResidenceAddressChanged() {
+        return isResidenceAddressChanged;
+    }
+
+    public void setIsResidenceAddressChanged(Boolean isResidenceAddressChanged) {
+        this.isResidenceAddressChanged = isResidenceAddressChanged;
+    }
+
+    public Boolean isBillingAddressChanged() {
+        return isBillingAddressChanged;
+    }
+
+    public void setIsBillingAddressChanged(Boolean isBillingAddressChanged) {
+        this.isBillingAddressChanged = isBillingAddressChanged;
+    }
+
+    public Boolean isCompanyAddressChanged() {
+        return isCompanyAddressChanged;
+    }
+
+    public void setIsCompanyAddressChanged(Boolean isCompanyAddressChanged) {
+        this.isCompanyAddressChanged = isCompanyAddressChanged;
+    }
+
+    public Boolean isResPhoneNoChanged() {
+        return isResPhoneNoChanged;
+    }
+
+    public void setIsResPhoneNoChanged(Boolean isResPhoneNoChanged) {
+        this.isResPhoneNoChanged = isResPhoneNoChanged;
+    }
+
+    public Boolean isMobilePhoneNoChanged() {
+        return isMobilePhoneNoChanged;
+    }
+
+    public void setIsMobilePhoneNoChanged(Boolean isMobilePhoneNoChanged) {
+        this.isMobilePhoneNoChanged = isMobilePhoneNoChanged;
+    }
+
+    public Boolean isOfficePhoneNoChanged() {
+        return isOfficePhoneNoChanged;
+    }
+
+    public void setIsOfficePhoneNoChanged(Boolean isOfficePhoneNoChanged) {
+        this.isOfficePhoneNoChanged = isOfficePhoneNoChanged;
+    }
+
+    public Boolean isEstMobContactNoChanged() {
+        return isEstMobContactNoChanged;
+    }
+
+    public void setIsEstMobContactNoChanged(Boolean isEstMobContactNoChanged) {
+        this.isEstMobContactNoChanged = isEstMobContactNoChanged;
+    }
+
+    public Boolean isEstLandContactNoChanged() {
+        return isEstLandContactNoChanged;
+    }
+
+    public void setIsEstLandContactNoChanged(Boolean isEstLandContactNoChanged) {
+        this.isEstLandContactNoChanged = isEstLandContactNoChanged;
+    }
+
+    public Boolean isFaxNoChanged() {
+        return isFaxNoChanged;
+    }
+
+    public void setIsFaxNoChanged(Boolean isFaxNoChanged) {
+        this.isFaxNoChanged = isFaxNoChanged;
+    }
+     
+     
+
+}

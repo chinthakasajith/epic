@@ -1,0 +1,350 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.backoffice.generalledgermgtmgt.servlet;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.backoffice.generalledgermgtmgt.bean.AssignTxnBean;
+import com.epic.cms.backoffice.generalledgermgtmgt.bean.ChannelLisnrTypeBean;
+import com.epic.cms.backoffice.generalledgermgtmgt.bean.GeneralLedgerMgtBean;
+import com.epic.cms.backoffice.generalledgermgtmgt.bean.TxnTypesBean;
+import com.epic.cms.backoffice.generalledgermgtmgt.businesslogic.AssignTxnTypesToGLAccountManager;
+import com.epic.cms.backoffice.generalledgermgtmgt.businesslogic.GeneralLedgerMgtManager;
+import com.epic.cms.system.util.exception.AccessDeniedException;
+import com.epic.cms.system.util.exception.NewLoginSessionException;
+import com.epic.cms.system.util.exception.SesssionExpException;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.variable.ApplicationVarList;
+import com.epic.cms.system.util.variable.MessageVarList;
+import com.epic.cms.system.util.variable.PageVarList;
+import com.epic.cms.system.util.variable.SectionVarList;
+import com.epic.cms.system.util.variable.TaskVarList;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author badrika
+ */
+public class ViewAndDeleteTxnTypesToGLAccount extends HttpServlet {
+
+    private HttpSession sessionObj;
+    private SystemUserManager systemUserManager;
+    private SessionVarList sessionVarlist;
+    private SessionUser sessionUser;
+    private RequestDispatcher rd;
+    private String url = "/backoffice/generalledgermgt/assigntxntoglaccount.jsp";
+    private List<String> userTaskList;
+    private AssignTxnTypesToGLAccountManager assignmanager;
+    private GeneralLedgerMgtManager glmanager;
+    private List<GeneralLedgerMgtBean> allGLAccList;
+    private List<AssignTxnBean> allOnlineGLAccList;
+    private String id = "";
+    private String accNo = "";//credit
+    private String drAccNo="";//debit
+    private String lisOrCh = "";
+    private String lcType = "";
+    private String upvd = "";
+    private AssignTxnBean assBean;
+    private List<ChannelLisnrTypeBean> chanelLisnrTypeList;
+    private List<TxnTypesBean> txnTypeslist;
+    private List<TxnTypesBean> assinedtxnTypeslist;
+    private SystemAuditBean systemAuditBean;
+
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        try {
+            sessionObj = request.getSession(false);
+
+            try {
+
+                systemUserManager = new SystemUserManager();
+                sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+                sessionUser = sessionVarlist.getCMSSessionUser();
+
+                //check system user is in the same session or not
+                try {
+
+                    if (!systemUserManager.validateUserSession(sessionUser.getUserName(), sessionObj.getId())) {
+                        //user not in same session.
+                        throw new NewLoginSessionException();
+
+                    }
+
+                } catch (NewLoginSessionException nlex) {
+                    //throw lst login close exception
+                    throw new NewLoginSessionException();
+
+                }
+                try {
+                    //set page code and task codes
+                    String pageCode = PageVarList.ASSIGN_TXN_TO_GL;
+                    String taskCode = TaskVarList.ACCESSPAGE;
+
+
+                    //check whether userrole can access this page and task
+                    if (this.isValidAccess(sessionUser.getUserRole(), pageCode, taskCode)) {
+                        try {
+                            assignmanager = new AssignTxnTypesToGLAccountManager();
+                            glmanager = new GeneralLedgerMgtManager();
+
+                            id = request.getParameter("id");
+                            accNo = request.getParameter("glAccNo");
+                            drAccNo=request.getParameter("drglAccNo");
+                            lisOrCh = request.getParameter("chanekOrLisnr");
+                            lcType = request.getParameter("chOrLsType");
+
+                            upvd = request.getParameter("upvd");
+
+                            assBean = new AssignTxnBean();
+
+                            assBean = assignmanager.viewSelected(id, accNo,drAccNo, lisOrCh, lcType);
+
+
+                            if (upvd.equals("updt")) {
+
+                                if (!this.isValidTaskByUser(sessionVarlist.getUserPageTaskList(), TaskVarList.UPDATE)) {
+                                    throw new AccessDeniedException();
+                                }
+
+                                request.setAttribute("operationtype", "add");//or update
+                                chanelLisnrTypeList = assignmanager.getChanelLisnrTypeList(assBean.getChanekOrLisnr());
+                                request.setAttribute("chlsList", chanelLisnrTypeList);
+
+                                txnTypeslist = assignmanager.getTxnTypes(assBean.getChanekOrLisnr(), assBean.getChOrLsType(),assBean.getGlAccNo(),assBean.getDrGlAccNo());
+                                request.setAttribute("txnTypeslist", txnTypeslist);
+
+                                assinedtxnTypeslist = assignmanager.getassinedTxnTypes(assBean.getChanekOrLisnr(), assBean.getChOrLsType(),assBean.getGlAccNo(),assBean.getDrGlAccNo());
+                                request.setAttribute("assTxnTypeslist", assinedtxnTypeslist);
+
+
+                                //assBean = assignmanager.viewSelected(accNo);
+                                request.setAttribute("assignBean", assBean);
+
+                            } else if (upvd.equals("viw")) {
+
+                                request.setAttribute("operationtype", "view");
+
+                                chanelLisnrTypeList = assignmanager.getChanelLisnrTypeList(assBean.getChanekOrLisnr());
+                                request.setAttribute("chlsList", chanelLisnrTypeList);
+
+                                txnTypeslist = assignmanager.getTxnTypes(assBean.getChanekOrLisnr(), assBean.getChOrLsType(),assBean.getGlAccNo(),assBean.getDrGlAccNo());
+                                request.setAttribute("txnTypeslist", txnTypeslist);
+
+                                assinedtxnTypeslist = assignmanager.getassinedTxnTypes(assBean.getChanekOrLisnr(), assBean.getChOrLsType(),assBean.getGlAccNo(),assBean.getDrGlAccNo());
+                                request.setAttribute("assTxnTypeslist", assinedtxnTypeslist);
+
+
+                                //assBean = assignmanager.viewSelected(accNo);
+                                request.setAttribute("assignBean", assBean);
+
+                            } else if (upvd.equals("del")) {
+
+                                if (!this.isValidTaskByUser(sessionVarlist.getUserPageTaskList(), TaskVarList.DELETE)) {
+                                    throw new AccessDeniedException();
+                                }
+
+                                request.setAttribute("operationtype", "add");
+                                chanelLisnrTypeList = assignmanager.getChanelLisnrTypeList(assBean.getChanekOrLisnr());
+                                request.setAttribute("chlsList", chanelLisnrTypeList);
+
+                                assinedtxnTypeslist = assignmanager.getassinedTxnTypes(assBean.getChanekOrLisnr(), assBean.getChOrLsType(),assBean.getGlAccNo(),assBean.getDrGlAccNo());
+                                //request.setAttribute("assTxnTypeslist", assinedtxnTypeslist);
+
+                                String[] assList = new String[assinedtxnTypeslist.size()];
+                                for (int i = 0; i < assList.length; i++) {
+                                    assList[i] = assinedtxnTypeslist.get(i).getTypeCode().toString();
+                                }
+
+                                this.setAudittraceValue(request);
+
+                                int success = assignmanager.deletetxns(systemAuditBean, assBean, assList);
+
+                                if (success > 0) {
+
+                                    request.setAttribute(MessageVarList.JSP_SUCCESS, "Credit Account No:" + accNo + " " + MessageVarList.GLACCOUNT_DELETE_SUCCESS);
+                                }
+                            }
+
+                            allGLAccList = glmanager.getAllGlAccounts();
+                            request.setAttribute("accList", allGLAccList);
+
+                            allOnlineGLAccList = assignmanager.getOnlineGlAccounts();
+                            request.setAttribute("allOnlineGLAccList", allOnlineGLAccList);
+
+                            rd = getServletContext().getRequestDispatcher(url);
+
+                        } catch (Exception e) {
+                            request.setAttribute("operationtype", "add");
+                            request.setAttribute("errorMsg", MessageVarList.UNKNOW_ERROR);
+                            rd = getServletContext().getRequestDispatcher(url);
+
+                        }
+
+
+                    } else {
+
+                        //if invalid throw access denied exception
+                        throw new AccessDeniedException();
+
+                    }
+
+                    //set tasks to the session
+                    sessionVarlist.setUserPageTaskList(userTaskList);
+
+
+                } catch (AccessDeniedException adex) {
+                    throw adex;
+                }
+            } catch (NullPointerException ex) {
+                //throw session null exception
+                throw new SesssionExpException();
+            }
+
+            //------------------------------------------------------------------------------------------------------------//
+        } //catch session exception
+        catch (SesssionExpException sex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.SESSION_EXPIRED);
+
+
+        } //catch session exception
+        catch (NewLoginSessionException nlex) {
+
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.LAST_SESSION_CLOSE);
+
+
+        } //catch accessdenied exception
+        catch (AccessDeniedException adex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.ACCESS_DENIED_TASK);
+
+        } catch (Exception ex) {
+            request.setAttribute("operationtype", "add");
+            request.setAttribute("errorMsg", MessageVarList.UNKNOW_ERROR);
+            rd = getServletContext().getRequestDispatcher(url);
+
+        } finally {
+            rd.forward(request, response);
+        }
+    }
+
+    private boolean isValidAccess(String userrole, String pagecode, String task) throws Exception {
+        boolean isValidTaskAccess = false;
+
+        try {
+            systemUserManager = new SystemUserManager();
+            //get all tasks for userrole for this page
+            userTaskList = systemUserManager.getTasksByPageCodeAndUserRole(userrole, pagecode);
+
+            for (String usertask : userTaskList) {
+
+                if (task.equals(usertask)) {
+                    isValidTaskAccess = true;
+                }
+            }
+            return isValidTaskAccess;
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+    }
+
+    private boolean isValidTaskByUser(List<String> userTaskList, String task) throws Exception {
+        boolean isValidTask = false;
+        try {
+            for (String usertask : userTaskList) {
+                if (task.equals(usertask)) {
+                    isValidTask = true;
+                }
+            }
+            return isValidTask;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private void setAudittraceValue(HttpServletRequest request) throws Exception {
+
+        try {
+            systemAuditBean = new SystemAuditBean();
+            String uniqueId = request.getParameter("glacc");
+
+            systemAuditBean.setUserRoleCode(sessionVarlist.getCMSSessionUser().getUserRole());
+            systemAuditBean.setUserName(sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setUniqueId(uniqueId);
+            systemAuditBean.setDescription("Delete transactions from GL Account. GL Account Code: " + uniqueId + "; by:  " + sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setApplicationCode(ApplicationVarList.BACK_OFFICE);
+            systemAuditBean.setSectionCode(SectionVarList.GL_LEDGER_MGT);
+            systemAuditBean.setPageCode(PageVarList.ASSIGN_TXN_TO_GL);
+            systemAuditBean.setTaskCode(TaskVarList.DELETE);
+            systemAuditBean.setIp(request.getRemoteAddr());
+            systemAuditBean.setRemarks(uniqueId);
+            systemAuditBean.setFieldName("");
+            systemAuditBean.setOldValue("");
+            systemAuditBean.setNewValue("");
+
+            systemAuditBean.setLastUpdateduser(sessionVarlist.getCMSSessionUser().getUserName());
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

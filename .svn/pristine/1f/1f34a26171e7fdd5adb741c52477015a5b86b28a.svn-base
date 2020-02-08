@@ -1,0 +1,330 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.backoffice.cardstandingorder.persistance;
+
+import com.epic.cms.backoffice.cardstandingorder.bean.CardDetailsBean;
+import com.epic.cms.backoffice.cardstandingorder.bean.CardStandingOrderBean;
+import com.epic.cms.system.util.variable.StatusVarList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.HashMap;
+//import java.util.Date;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author badrika
+ */
+public class CardStandingOrderPersistance {
+
+    private HashMap<String, String> currencyList;
+    private HashMap<String, String> orderTypeList;
+    private ResultSet rs;
+
+    public HashMap<String, String> getAllCurrencyList(Connection con) throws Exception {
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("SELECT CURRENCYNUMCODE,DESCRIPTION "
+                    + "FROM CURRENCY");
+
+            rs = ps.executeQuery();
+            currencyList = new HashMap<String, String>();
+
+            while (rs.next()) {
+
+                currencyList.put(rs.getString("CURRENCYNUMCODE"), rs.getString("DESCRIPTION"));
+
+
+            }
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+
+        return currencyList;
+    }
+
+    public HashMap<String, String> getAllStandingOrderTypeList(Connection con) throws Exception {
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("SELECT ORDERID,ORDERNAME "
+                    + "FROM STANDINGORDERTYPE WHERE STATUS=? ");
+
+            ps.setString(1, StatusVarList.ACTIVE_STATUS);
+            rs = ps.executeQuery();
+            orderTypeList = new HashMap<String, String>();
+
+            while (rs.next()) {
+
+                orderTypeList.put(rs.getString("ORDERID"), rs.getString("ORDERNAME"));
+
+
+            }
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+
+        return orderTypeList;
+    }
+
+    public CardDetailsBean getCardDetails(Connection con, String cardnum) throws Exception {
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("SELECT C.NAMEONCARD,C.EXPIERYDATE,C.CARDSTATUS,S.DESCRIPTION "
+                    + "FROM CARD C,STATUS S "
+                    + "WHERE CARDNUMBER=? and C.CARDSTATUS=? and C.CARDSTATUS=S.STATUSCODE ");
+
+            ps.setString(1, cardnum);
+            ps.setString(2, StatusVarList.ACTIVE_STATUS);
+            rs = ps.executeQuery();
+
+            CardDetailsBean bean = new CardDetailsBean();
+
+            while (rs.next()) {
+
+                bean.setCardnum(cardnum);                
+                bean.setCardHolderName(rs.getString(1));
+                bean.setExpDate(rs.getString(2));
+                bean.setStatus(rs.getString(3));
+                bean.setStatusDes(rs.getString(4));
+
+
+            }
+            return bean;
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+
+
+    }
+
+    public CardDetailsBean getMinMaxAmount(Connection con, String ordertype) throws Exception {
+        ResultSet rs = null;
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("SELECT MINIMUMTXNAMOUNT,MAXIMUMTXNAMOUNT "
+                    + "FROM STANDINGORDERTYPE WHERE ORDERID=? ");
+
+            ps.setString(1, ordertype);
+            rs = ps.executeQuery();
+
+            CardDetailsBean bean = new CardDetailsBean();
+
+            while (rs.next()) {
+
+                bean.setMin(rs.getInt(1));
+                bean.setMax(rs.getInt(2));
+
+            }
+            return bean;
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+
+
+    }
+
+    public int addNewStandingOrder(Connection cmsCon, CardStandingOrderBean bean) throws Exception {
+        int i = -1;
+        PreparedStatement ps = null;
+        try {
+
+            Date startdate = Date.valueOf(bean.getStartDate());
+            Date enddate = Date.valueOf(bean.getEndDate());
+            Date nextdate = Date.valueOf(bean.getNextDate());
+
+            String query = "INSERT INTO CARDSTANDINGORDER (STANDINGORDERID, CARDNO, ORDERID, STARTDATE, ENDDATE, AMOUNT, CURRENCYTYPE, PAYDAY, "
+                    + "FREQUENCYTYPE, NEXTDATE, DESCRIPTION, STATUS, LASTUPDATEDUSER, LASTUPDATEDTIME, CREATEDTIME) "
+                    + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,SYSDATE,SYSDATE)";
+
+            ps = cmsCon.prepareStatement(query);
+
+            ps.setString(1, bean.getStandingOrderId());
+            ps.setString(2, bean.getCardNumber());
+            ps.setString(3, bean.getOrderTypeId());
+            ps.setDate(4, startdate);
+            ps.setDate(5, enddate);
+            ps.setString(6, bean.getAmmount());
+            ps.setString(7, bean.getCurrencyType());
+            ps.setString(8, bean.getPayDay());
+            ps.setString(9, bean.getFrequency());
+            ps.setDate(10, nextdate);
+            ps.setString(11, bean.getDescription());
+            ps.setString(12, bean.getStatus());
+            ps.setString(13, bean.getLastUpdatedUser());
+
+
+            i = ps.executeUpdate();
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            ps.close();
+        }
+        return i;
+    }
+
+    public int updateStandingOrder(Connection cmsCon, CardStandingOrderBean bean) throws Exception {
+        int i = -1;
+        PreparedStatement ps = null;
+        try {
+
+            Date startdate = Date.valueOf(bean.getStartDate());
+            Date enddate = Date.valueOf(bean.getEndDate());
+            Date nextdate = Date.valueOf(bean.getNextDate());
+
+            String query = "UPDATE CARDSTANDINGORDER SET CARDNO=?, ORDERID=?, STARTDATE=?, ENDDATE=?, AMOUNT=?, CURRENCYTYPE=?, PAYDAY=?, "
+                    + "FREQUENCYTYPE=?, NEXTDATE=?, DESCRIPTION=?, STATUS=?, LASTUPDATEDUSER=?, LASTUPDATEDTIME=SYSDATE"
+                    + " WHERE STANDINGORDERID=? ";
+
+            ps = cmsCon.prepareStatement(query);
+
+            ps.setString(1, bean.getCardNumber());
+            ps.setString(2, bean.getOrderTypeId());
+            ps.setDate(3, startdate);
+            ps.setDate(4, enddate);
+            ps.setString(5, bean.getAmmount());
+            ps.setString(6, bean.getCurrencyType());
+            ps.setString(7, bean.getPayDay());
+            ps.setString(8, bean.getFrequency());
+            ps.setDate(9, nextdate);
+            ps.setString(10, bean.getDescription());
+            ps.setString(11, bean.getStatus());
+            ps.setString(12, bean.getLastUpdatedUser());
+
+            ps.setString(13, bean.getStandingOrderId());
+
+
+            i = ps.executeUpdate();
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            ps.close();
+        }
+        return i;
+    }
+
+    public int deleteStandingOrder(Connection cmsCon, String id) throws Exception {
+        int i = -1;
+        PreparedStatement ps = null;
+        try {
+            String query = "DELETE FROM CARDSTANDINGORDER WHERE STANDINGORDERID=? ";
+
+            ps = cmsCon.prepareStatement(query);
+            ps.setString(1, id);
+
+            i = ps.executeUpdate();
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            ps.close();
+        }
+        return i;
+    }
+
+    public List<CardStandingOrderBean> getAllOrderLists(Connection cmsCon) throws Exception {
+
+        List<CardStandingOrderBean> orderList = new ArrayList<CardStandingOrderBean>();
+        PreparedStatement ps = null;
+
+        try {
+            String query = "SELECT SO.STANDINGORDERID, SO.CARDNO, SO.ORDERID, SO.STARTDATE, SO.ENDDATE, SO.AMOUNT, SO.CURRENCYTYPE, SO.PAYDAY, "
+                    + "SO.FREQUENCYTYPE, SO.NEXTDATE, SO.DESCRIPTION as sodes, SO.STATUS, ST.DESCRIPTION as stdes, SO.LASTUPDATEDUSER, SO.ISELIGIBLEBC, "
+                    + "OT.ORDERNAME, CU.DESCRIPTION as curdes "
+                    + "FROM CARDSTANDINGORDER SO, STATUS ST, STANDINGORDERTYPE OT, CURRENCY CU "
+                    + "WHERE SO.STATUS=ST.STATUSCODE and SO.ORDERID=OT.ORDERID and CU.CURRENCYNUMCODE=SO.CURRENCYTYPE ";
+
+            ps = cmsCon.prepareStatement(query);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CardStandingOrderBean bean = new CardStandingOrderBean();
+                bean.setStandingOrderId(rs.getString("STANDINGORDERID"));
+                bean.setCardNumber(rs.getString("CARDNO"));
+                bean.setOrderTypeId(rs.getString("ORDERID"));
+                bean.setOrderTypeIdDes(rs.getString("ORDERNAME"));               
+                bean.setStartDate(String.valueOf(rs.getDate("STARTDATE")));
+                bean.setEndDate(String.valueOf(rs.getDate("ENDDATE")));
+                bean.setAmmount(rs.getString("AMOUNT"));
+                bean.setCurrencyType(rs.getString("CURRENCYTYPE"));
+                bean.setCurrencyDes(rs.getString("curdes"));
+                bean.setPayDay(rs.getString("PAYDAY"));
+                bean.setFrequency(rs.getString("FREQUENCYTYPE"));
+                bean.setNextDate(String.valueOf(rs.getDate("NEXTDATE")));
+                bean.setDescription(rs.getString("sodes"));
+                bean.setStatus(rs.getString("STATUS"));
+                bean.setStatusDes(rs.getString("stdes"));
+                bean.setLastUpdatedUser(rs.getString("LASTUPDATEDUSER"));
+                bean.setIsEligibleBC(rs.getString("ISELIGIBLEBC"));
+
+                orderList.add(bean);
+            }
+
+            return orderList;
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+
+
+    }
+
+    public int getOrderId(Connection con) throws Exception {
+
+        int num = -1;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            String query = "SELECT MAX(STANDINGORDERID) FROM CARDSTANDINGORDER";
+
+            ps = con.prepareStatement(query);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                num = rs.getInt("MAX(STANDINGORDERID)");
+            }
+
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            rs.close();
+            ps.close();
+
+        }
+        return num + 1;
+    }
+}

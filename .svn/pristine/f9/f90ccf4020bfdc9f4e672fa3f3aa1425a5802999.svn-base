@@ -1,0 +1,87 @@
+
+<html>
+
+<style type="text/css">
+<!--
+body,td,th {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: small;
+}
+body {
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+.style6 {color: #00CC33; font-weight: bold; }
+.style7 {color: #FF3300; font-weight: bold; }
+.style9 {color: #0099FF; font-weight: bold; }
+.style13 {color: #FF9933; font-weight: bold; }
+-->
+</style>
+
+<br>
+<table width="100%" border="0" align="left">
+  <tr bgcolor="#99CCFF">
+    <td width="91"><div align="center"><strong>SDM</strong></div></td>
+    <td width="51"><div align="center"><strong>New</strong></div></td>
+    <td width="97"><div align="center"><strong>Forwarded</strong></div></td>
+    <td width="98"><div align="center"><strong>Processed</strong></div></td>
+    <td width="112"><div align="center"><strong>Incomplete Data</strong></div></td>
+    <td width="103"><div align="center"><strong>Pending Originals</strong></div></td>
+    <td width="49"><div align="center"><strong>ETC</strong></div></td>
+    <td width="90"><div align="center"><strong>Rejected</strong></div></td>
+  </tr>
+  <tr>
+    <td height="23">India</td>
+    <td><div align="center" class="style7">5</div></td>
+    <td><div align="center" class="style13">3</div></td>
+    <td><div align="center" class="style9">6</div></td>
+    <td><div align="center"><strong>5</strong></div></td>
+    <td><div align="center"><strong>5</strong></div></td>
+    <td><div align="center"><strong>6</strong></div></td>
+    <td><div align="center" class="style6">12</div></td>
+  </tr>
+  <tr>
+    <td>Japan</td>
+    <td><div align="center" class="style7">6</div></td>
+    <td><div align="center" class="style13">5</div></td>
+    <td><div align="center" class="style9">5</div></td>
+    <td><div align="center"><strong>2</strong></div></td>
+    <td><div align="center"><strong>2</strong></div></td>
+    <td><div align="center"><strong>5</strong></div></td>
+    <td><div align="center" class="style6">5</div></td>
+  </tr>
+  <tr>
+    <td>Italy</td>
+    <td><div align="center" class="style7">9</div></td>
+    <td><div align="center" class="style13">7</div></td>
+    <td><div align="center" class="style9">10</div></td>
+    <td><div align="center"><strong>6</strong></div></td>
+    <td><div align="center"><strong>6</strong></div></td>
+    <td><div align="center"><strong>2</strong></div></td>
+    <td><div align="center" class="style6">8</div></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><div align="center" class="style7">5</div></td>
+    <td><div align="center" class="style13">4</div></td>
+    <td><div align="center" class="style9">5</div></td>
+    <td><div align="center"><strong>8</strong></div></td>
+    <td><div align="center"><strong>8</strong></div></td>
+    <td><div align="center"><strong>1</strong></div></td>
+    <td><div align="center" class="style6">4</div></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><div align="center" class="style7">8</div></td>
+    <td><div align="center" class="style13">2</div></td>
+    <td><div align="center" class="style9">6</div></td>
+    <td><div align="center"><strong>9</strong></div></td>
+    <td><div align="center"><strong>8</strong></div></td>
+    <td><div align="center"><strong>7</strong></div></td>
+    <td><div align="center" class="style6">8</div></td>
+  </tr>
+</table>
+
+</html>

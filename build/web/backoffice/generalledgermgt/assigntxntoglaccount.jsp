@@ -1,0 +1,637 @@
+<%-- 
+    Document   : assigntxntoglaccount
+    Created on : Nov 16, 2012, 9:03:46 AM
+    Author     : badrika
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+
+<%@taglib  prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
+<%@page  import="com.epic.cms.system.util.variable.MessageVarList" %>
+<%@page  import="com.epic.cms.system.util.variable.PageVarList" %>
+
+
+
+<!DOCTYPE html>
+
+
+<html >
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <!--        include content.jsp for all js and css inclusion-->
+        <jsp:include page="/content.jsp"/>
+        <!--        include content.jsp for all js and css inclusion-->
+
+        <script>
+
+            function LoadChnLsnrTypeList(chorls) {
+
+                $('#cltype').empty();
+
+                var chanelorlist = chorls;
+                //var sval=$("#productionMode").val();
+                $.getJSON("${pageContext.servletContext.contextPath}/GetChannelListenerListServlet",
+                        {
+                            //promode : sval,                
+                            chanelorlist: chanelorlist
+                        },
+                function (jsonobject) {
+                    $.each(jsonobject.combo1, function (code, description) {
+                        $('#cltype').append(
+                                $('<option></option>').val(code).html(description)
+                                );
+                    });
+                });
+
+            }
+            function LoadChnLsnrTypeList2(chorls) {
+                //document.location="${pageContext.request.contextPath}/GetChannelListenerListServlet?chanOrLisn="+chorls;
+                document.assigntxntoglaccform.action = "${pageContext.request.contextPath}/GetChannelListenerListServlet?chanOrLisn=" + chorls;
+                document.assigntxntoglaccform.submit();
+
+            }
+
+            function TxnTypesList() {
+                // window.location = "${pageContext.request.contextPath}/GetTansactionTypesToGLAccountServlet?chType1="+chType+"&accNo1="+accNo+"&col1="+col; 
+                document.assigntxntoglaccform.action = "${pageContext.request.contextPath}/GetTansactionTypesToGLAccountServlet";
+                document.assigntxntoglaccform.submit();
+            }
+
+            function selectAll(selectBox) {
+                for (var i = 0; i < selectBox.options.length; i++) {
+                    selectBox.options[i].selected = true;
+                }
+                invokeAdd();
+            }
+
+            function invokeAdd()
+            {
+
+                document.assigntxntoglaccform.action = "${pageContext.request.contextPath}/AddTxnTypesToGLAccount";
+                document.assigntxntoglaccform.submit();
+
+            }
+
+            function Back() {
+
+                window.location = "${pageContext.request.contextPath}/LoadAssignTxnTypesToGLAccount";
+            }
+
+            function invokeViewAndUpdate(id, col, cltype, accno, draccno, upvd) {
+                document.viewTableForm.action = "${pageContext.request.contextPath}/ViewAndDeleteTxnTypesToGLAccount?upvd=" + upvd;
+                document.getElementById('id').value = id;
+                document.getElementById('chanekOrLisnr').value = col;
+                document.getElementById('chOrLsType').value = cltype;
+                document.getElementById('glAccNo').value = accno;
+                document.getElementById('drGlAccNo').value = draccno;
+                document.viewTableForm.submit();
+
+            }
+
+            function invokeDelete(id, col, cltype, accno, draccno, upvd) {
+
+//                answer = confirm("Do you really want to delete " + accno + " GL Account?")
+//                if (answer != 0)
+//                {
+//                    document.viewTableForm.action = "${pageContext.request.contextPath}/ViewAndDeleteTxnTypesToGLAccount?upvd=" + upvd;
+//                    document.getElementById('id').value = id;
+//                    document.getElementById('chanekOrLisnr').value = col;
+//                    document.getElementById('chOrLsType').value = cltype;
+//                    document.getElementById('glAccNo').value = accno;
+//                    document.getElementById('drGlAccNo').value=draccno;
+//                    document.viewTableForm.submit();
+//                }
+//                else
+//                {
+//                    window.location = "${pageContext.request.contextPath}/LoadAssignTxnTypesToGLAccount";
+//                }
+                $("#dialog-confirm").html("<p>Do you really want to delete " + accno + " GL Account?</p>");
+                $("#dialog-confirm").dialog({
+                    resizable: false,
+                    height: 'auto',
+                    width: 500,
+                    modal: true,
+                    buttons: {
+                        "No": function () {
+                            window.location = "${pageContext.request.contextPath}/LoadAssignTxnTypesToGLAccount";
+                        },
+                        "Yes": function () {
+                            document.viewTableForm.action = "${pageContext.request.contextPath}/ViewAndDeleteTxnTypesToGLAccount?upvd=" + upvd;
+                            document.getElementById('id').value = id;
+                            document.getElementById('chanekOrLisnr').value = col;
+                            document.getElementById('chOrLsType').value = cltype;
+                            document.getElementById('glAccNo').value = accno;
+                            document.getElementById('drGlAccNo').value = draccno;
+                            document.viewTableForm.submit();
+                        }
+                    }
+                });
+
+            }
+
+            function resetglForm() {
+                window.location = "${pageContext.request.contextPath}/LoadAssignTxnTypesToGLAccount";
+            }
+
+        </script>
+
+        <script>
+            function settitle() {
+
+                $.post("${pageContext.request.contextPath}/SetNavigationTitleServlet",
+                        {pagecode: '<%= PageVarList.ASSIGN_TXN_TO_GL%>'
+                        },
+                function (data) {
+
+                    if (data != '') {
+                        $('.center').text(data)
+                        var heading = data.split('→');
+                        $('.heading').text(heading[1]);
+
+                    }
+
+
+                });
+
+            }
+
+        </script> 
+
+
+    </head>
+    <body>
+        <c:if test="${sessionScope.SessionObject==null}">
+            <c:redirect url="/administrator/controlpanel/login/login.jsp"/>
+        </c:if>
+
+        <div class="container" >
+
+            <div class="header">
+                <!--                <font size="20" color="FFFFFF" style="font: bold">  Card Management System </font>-->
+
+            </div>
+
+
+            <div class="main" >
+                <jsp:include page="/subheader.jsp"/>
+
+
+
+                <div class="content" >
+
+                    <jsp:include page="/leftmenu.jsp"/>
+
+                </div>
+
+
+                <div id="content1" >
+                    <div id="content" align="center">
+                        <div id="contenttext">
+                            <div class="bodytext" style="padding:12px;" align="left">
+
+                                <!--  ----------------------start  developer area  -----------------------------------                           -->
+
+                                <table class="tit"> <tr> <td   class="heading"> </td> </tr></table>
+                                <script> settitle();</script>
+
+                                <br/>
+                                <table>
+                                    <tr>
+                                        <td colspan="3"><font color="#FF0000"><b><c:out value="${errorMsg}"></c:out></b></font>
+                                            <font color="green"><b><c:out value="${successMsg}"></c:out></b></font>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+
+
+                                <c:if test="${operationtype=='add'}" >
+                                    <form method="POST" action="${pageContext.request.contextPath}/AddTxnTypesToGLAccount" name="assigntxntoglaccform">
+
+                                        <table border="0">
+                                            <tr>
+                                                <td>CR GL Account </td>
+                                                <td><font style="color: red;">*</font></td>
+                                                <td><select  name="glacc" id="glacc" class="inputfield-mandatory" style="width: 168px;">
+                                                        <option value="" selected>--SELECT--</option>
+                                                        <c:forEach var="gl" items="${accList}">
+
+                                                            <c:if test="${assignBean.glAccNo==gl.glAccNo}">
+                                                                <option value="${gl.glAccNo}" selected>${gl.glAccNo}</option>
+                                                            </c:if>
+                                                            <c:if test="${assignBean.glAccNo!=gl.glAccNo}">
+                                                                <option value="${gl.glAccNo}">${gl.glAccNo}</option>
+
+                                                            </c:if>
+
+
+                                                        </c:forEach>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                            <tr>
+                                                <!--new by chinthaka-->
+                                            <tr>
+                                                <td>DR GL Account </td>
+                                                <td><font style="color: red;">*</font></td>
+                                                <td><select  name="drglacc" id="dracc" class="inputfield-mandatory" style="width: 168px;">
+                                                        <option value="" selected>--SELECT--</option>
+                                                        <c:forEach var="gl" items="${accList}">
+
+                                                            <c:if test="${assignBean.drGlAccNo==gl.glAccNo}">
+                                                                <option value="${gl.glAccNo}" selected>${gl.glAccNo}</option>
+                                                            </c:if>
+                                                            <c:if test="${assignBean.drGlAccNo!=gl.glAccNo}">
+                                                                <option value="${gl.glAccNo}">${gl.glAccNo}</option>
+
+                                                            </c:if>
+
+
+                                                        </c:forEach>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                            <tr>
+                                                <td>Channel or Listener </td>
+                                                <td><font style="color: red;">*</font></td>
+
+                                                <td>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr=='1'}">
+                                                        <input type="radio" name="chanOrLisn" value="1" id="c" checked="true" onchange="LoadChnLsnrTypeList2(c.value)" class="col"/> Channel 
+                                                    </c:if>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr!='1'}">
+                                                        <input type="radio" name="chanOrLisn" value="1" id="c" onchange="LoadChnLsnrTypeList2(c.value)" class="col"/> Channel
+                                                    </c:if>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr=='2'}">
+                                                        <input type="radio" name="chanOrLisn" value="2" id="l" checked="true" onchange="LoadChnLsnrTypeList2(l.value)" class="col"/> Listener 
+                                                    </c:if>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr!='2'}">
+                                                        <input type="radio" name="chanOrLisn" value="2" id="l" onchange="LoadChnLsnrTypeList2(l.value)" class="col"/> Listener
+                                                    </c:if>
+
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+                                            <tr>
+                                                <td>Channel/Listener Type </td>
+                                                <td><font style="color: red;">*</font></td>
+                                                <td><select  name="cltype" id="cltype" class="inputfield-mandatory" style="width: 168px;" onchange="TxnTypesList()">
+                                                        <option value="" selected>--SELECT--</option>
+                                                        <c:forEach var="chls" items="${chlsList}">
+
+                                                            <c:if test="${assignBean.chOrLsType==chls.code}">
+                                                                <option value="${chls.code}" selected>${chls.description}</option>
+                                                            </c:if>
+                                                            <c:if test="${assignBean.chOrLsType!=chls.code}">
+                                                                <option value="${chls.code}">${chls.description}</option>
+
+                                                            </c:if>
+
+
+                                                        </c:forEach>
+
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                        </table>
+
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3">Transaction Types </td>
+                                                </tr>
+                                                <tr><td style="height: 5px"></td></tr>
+                                                <tr>
+                                                    <td>
+                                                        <h4><b>All Transaction Types</b></h4>
+                                                        <select name="notassignlist" style="width: 200px"  id=in multiple="multiple"  size=10>
+                                                            <c:forEach  var="txn" items="${txnTypeslist}">
+                                                                <option value="${txn.typeCode}" >${txn.description}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td align="center" >
+                                                        <input type=button value=">" onclick=moveout() class="buttonsize"><br>
+                                                        <input type=button value="<" onclick=movein() class="buttonsize"><br>
+                                                        <input type=button value=">>" onclick=moveallout() class="buttonsize"><br>
+                                                        <input type=button value="<<" onclick=moveallin() class="buttonsize">
+                                                    </td>
+                                                    <td>
+                                                        <h4><b>Assigned Transaction Types</b></h4>
+
+
+                                                        <select name="assignlist" style="width: 200px" id=out multiple="multiple"   size=10>
+
+                                                            <c:forEach  var="ass" items="${assTxnTypeslist}">
+                                                                <option value="${ass.typeCode}" >${ass.description}</option>
+                                                            </c:forEach>
+
+                                                        </select>
+
+
+                                                    </td>
+                                                </tr>
+                                                <tr style="height: 3px;"> </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <table>
+
+                                            <td><input type="submit" value="Save"  onclick="selectAll(assignlist)" style="width: 100px"/></td>
+                                            <td><input type="button" value="Reset" style="width: 100px" onclick="resetglForm()"/></td>
+
+                                        </table>
+
+                                    </form>
+                                </c:if>
+
+                                <c:if test="${operationtype=='update'}" >
+                                    <form method="POST" action="${pageContext.request.contextPath}/AddTxnTypesToGLAccount" name="assigntxntoglaccform">
+
+                                        <table border="0">
+                                            <tr>
+                                                <td>GL Account </td>
+                                                <td><font style="color: red;">*</font></td>
+                                                <td><select  name="glacc" id="glacc" class="inputfield-mandatory" style="width: 168px;" >
+                                                        <option value="" selected>--SELECT--</option>
+                                                        <c:forEach var="gl" items="${accList}">
+
+                                                            <c:if test="${assignBean.glAccNo==gl.glAccNo}">
+                                                                <option value="${gl.glAccNo}" selected>${gl.description}</option>
+                                                            </c:if>
+                                                            <c:if test="${assignBean.glAccNo!=gl.glAccNo}">
+                                                                <option value="${gl.glAccNo}">${gl.description}</option>
+
+                                                            </c:if>
+
+
+                                                        </c:forEach>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                            <tr>
+                                                <td>Channel or Listener </td>
+                                                <td><font style="color: red;">*</font></td>
+
+                                                <td>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr=='1'}">
+                                                        <input type="radio" name="chanOrLisn" value="1" id="c" checked="true" onchange="LoadChnLsnrTypeList2(c.value)" class="col" readonly/> Channel 
+                                                    </c:if>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr!='1'}">
+                                                        <input type="radio" name="chanOrLisn" value="1" id="c" onchange="LoadChnLsnrTypeList2(c.value)" class="col" readonly/> Channel
+                                                    </c:if>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr=='2'}">
+                                                        <input type="radio" name="chanOrLisn" value="2" id="l" checked="true" onchange="LoadChnLsnrTypeList2(l.value)" class="col" readonly/> Listener 
+                                                    </c:if>
+
+                                                    <c:if test="${assignBean.chanekOrLisnr!='2'}">
+                                                        <input type="radio" name="chanOrLisn" value="2" id="l" onchange="LoadChnLsnrTypeList2(l.value)" class="col" readonly/> Listener
+                                                    </c:if>
+
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+                                            <tr>
+                                                <td>Channel/Listener Type </td>
+                                                <td><font style="color: red;">*</font></td>
+                                                <td><select  name="cltype" id="cltype" class="inputfield-mandatory" style="width: 168px;" onchange="TxnTypesList()" disabled>
+                                                        <option value="" selected>--SELECT--</option>
+                                                        <c:forEach var="chls" items="${chlsList}">
+
+                                                            <c:if test="${assignBean.chOrLsType==chls.code}">
+                                                                <option value="${chls.code}" selected>${chls.description}</option>
+                                                            </c:if>
+                                                            <c:if test="${assignBean.chOrLsType!=chls.code}">
+                                                                <option value="${chls.code}">${chls.description}</option>
+
+                                                            </c:if>
+
+
+                                                        </c:forEach>
+
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                        </table>
+
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3">Transaction Types </td>
+                                                </tr>
+                                                <tr><td style="height: 5px"></td></tr>
+                                                <tr>
+                                                    <td>
+                                                        <h4><b>All Transaction Types</b></h4>
+                                                        <select name="notassignlist" style="width: 200px"  id=in multiple="multiple"  size=10>
+                                                            <c:forEach  var="txn" items="${txnTypeslist}">
+                                                                <option value="${txn.typeCode}" >${txn.description}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td align="center" >
+                                                        <input type=button value=">" onclick=moveout() class="buttonsize"><br>
+                                                        <input type=button value="<" onclick=movein() class="buttonsize"><br>
+                                                        <input type=button value=">>" onclick=moveallout() class="buttonsize"><br>
+                                                        <input type=button value="<<" onclick=moveallin() class="buttonsize">
+                                                    </td>
+                                                    <td>
+                                                        <h4><b>Assigned Transaction Types</b></h4>
+
+
+                                                        <select name="assignlist" style="width: 200px" id=out multiple="multiple"   size=10>
+
+                                                            <c:forEach  var="ass" items="${assTxnTypeslist}">
+                                                                <option value="${ass.typeCode}" >${ass.description}</option>
+                                                            </c:forEach>
+
+                                                        </select>
+
+
+                                                    </td>
+                                                </tr>
+                                                <tr style="height: 3px;"> </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <table>
+
+                                            <td><input type="submit" value="Save"  onclick="selectAll(assignlist)" style="width: 100px"/></td>
+                                            <td><input type="button" value="Back" style="width: 100px" onclick="Back()"/></td>
+
+                                        </table>
+
+                                    </form>
+                                </c:if>
+
+                                <c:if test="${operationtype=='view'}" >
+                                    <form method="POST" action="" name="">
+
+                                        <table border="0">
+                                            <tr>
+                                                <td>CR GL Account </td>
+                                                <td>:</td>
+                                                <td>${assignBean.glAccNo}</td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+                                            <tr>
+                                                <td>DR GL Account </td>
+                                                <td>:</td>
+                                                <td>${assignBean.drGlAccNo}</td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                            <tr>
+                                                <td>Channel or Listener </td>
+                                                <td>:</td>
+                                                <td>${assignBean.chanekOrLisnrDes}</td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                            <tr>
+                                                <td>Channel/Listener Type </td>
+                                                <td>:</td>
+                                                <td>${assignBean.chOrLsTypeDes}</td>
+                                            </tr>
+                                            <tr style="height: 3px;"> </tr>
+
+                                        </table>
+
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="3">Transaction Types </td>
+                                                </tr>
+                                                <tr><td style="height: 5px"></td></tr>
+                                                <tr>
+                                                    <td>
+                                                        <h4><b>All Transaction Types</b></h4>
+                                                        <select name="notassignlist" style="width: 200px"  id=in multiple="multiple"  size=10>
+                                                            <c:forEach  var="txn" items="${txnTypeslist}">
+                                                                <option value="${txn.typeCode}" >${txn.description}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </td>
+                                                    <td style="width: 10px;"></td>
+                                                    <td>
+                                                        <h4><b>Assigned Transaction Types</b></h4>
+
+
+                                                        <select name="assignlist" style="width: 200px" id=out multiple="multiple"   size=10>
+
+                                                            <c:forEach  var="ass" items="${assTxnTypeslist}">
+                                                                <option value="${ass.typeCode}" >${ass.description}</option>
+                                                            </c:forEach>
+
+                                                        </select>
+
+
+                                                    </td>
+                                                </tr>
+                                                <tr style="height: 3px;"> </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <table>
+
+                                            <td><input type="button" value="Back"  onclick="Back()" style="width: 100px"/></td>
+
+                                        </table>
+
+                                    </form>
+
+
+                                </c:if>
+
+
+                                <%-- show table data --%>
+                                <br/>
+                                <form name="viewTableForm" id="viewTableForm" method="post">
+                                    <table border="1" class="display" id="tableview">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Channel/Listener</th>
+                                                <th>Ch or Ls Type</th>
+
+                                                <th>CR Account </th>
+                                                <th>DR Account </th>
+
+                                                <th>View</th>
+                                                <th>Update</th>              
+                                                <th>Delete</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach  items="${allOnlineGLAccList}" var="list">
+
+                                                <tr>
+                                                    <td>${list.id}<input type="hidden" name="id" id="id" value="${list.id}"/></td>                                                    
+                                                    <td>${list.chanekOrLisnrDes}
+                                                        <input type="hidden" name="chanekOrLisnr" id="chanekOrLisnr" value="${list.chanekOrLisnr}"/>
+                                                        <input type="hidden" name="chanekOrLisnrDes" id="chanekOrLisnrDes" value="${list.chanekOrLisnrDes}"/>
+                                                    </td>
+                                                    <td>${list.chOrLsTypeDes}
+                                                        <input type="hidden" name="chOrLsType" id="chOrLsType" value="${list.chOrLsType}"/>
+                                                        <input type="hidden" name="chOrLsTypeDes" id="chOrLsTypeDes" value="${list.chOrLsTypeDes}"/>
+                                                    </td>
+                                                    <td>${list.glAccNo}
+                                                        <input type="hidden" name="glAccNo" id="glAccNo" value="${list.glAccNo}"/>
+                                                    </td>
+                                                    <td>${list.drGlAccNo}
+                                                        <input type="hidden" name="drglAccNo" id="drGlAccNo" value="${list.drGlAccNo}"/>
+                                                    </td>
+
+
+
+
+                                                    <td><a  href='#' onclick="invokeViewAndUpdate('${list.id}', '${list.chanekOrLisnr}', '${list.chOrLsType}', '${list.glAccNo}', '${list.drGlAccNo}', 'viw')">View</a></td>
+                                                    <td><a  href='#' onclick="invokeViewAndUpdate('${list.id}', '${list.chanekOrLisnr}', '${list.chOrLsType}', '${list.glAccNo}', '${list.drGlAccNo}', 'updt')">Update</a></td>
+                                                    <td><a  href='#' onclick="invokeDelete('${list.id}', '${list.chanekOrLisnr}', '${list.chOrLsType}', '${list.glAccNo}', '${list.drGlAccNo}', 'del')">Delete</a></td>
+
+
+                                                </tr>
+
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+
+                                </form>
+
+
+                                <!--   ------------------------- end developer area  --------------------------------                      -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearer"><span></span></div>
+            </div>
+
+        </div>
+                                      <!--confirmation dialog -->
+        <div id="dialog-confirm" title="Delete Confirmation">
+
+        </div>
+        <div class="footer"><jsp:include page="/footer.jsp"/></div>
+    </body>
+</html>

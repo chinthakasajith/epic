@@ -1,0 +1,515 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.admin.controlpanel.systemconfigmgt.servlet;
+
+import com.epic.cms.admin.controlpanel.systemconfigmgt.bean.PasswordPolicyBean;
+import com.epic.cms.admin.controlpanel.systemconfigmgt.businesslogic.PasswordPolicyManager;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.system.util.exception.NewLoginSessionException;
+import com.epic.cms.system.util.exception.SesssionExpException;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.variable.ApplicationVarList;
+import com.epic.cms.system.util.variable.MessageVarList;
+import com.epic.cms.system.util.variable.OracleMessage;
+import com.epic.cms.system.util.variable.PageVarList;
+import com.epic.cms.system.util.variable.RequestVarList;
+import com.epic.cms.system.util.variable.SectionVarList;
+import com.epic.cms.system.util.variable.TaskVarList;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Date;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author ayesh
+ */
+public class UpdatePasswordPolicyServlet extends HttpServlet {
+
+    private RequestDispatcher rd;
+    private SessionVarList sessionVarlist = null;
+    private SessionUser sessionUser = null;
+    private String url = "/administrator/controlpanel/systemconfigmgt/passwordpolicyhome.jsp";
+    private SystemUserManager sysUserOnj = null;
+    private SystemAuditBean systemAuditBean = null;
+    private SystemUserManager systemUserManager = null;
+    private String errorMsg = null;
+    private PasswordPolicyBean passBean = null;
+    private String oldValue = "";
+    private String newValue = "";
+    private PasswordPolicyBean bean;
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try {
+            try {
+                request.setAttribute("operationtype", "update");
+                HttpSession sessionObj = request.getSession(false);
+                systemUserManager = new SystemUserManager();
+                sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+                sessionUser = sessionVarlist.getCMSSessionUser();
+
+                try {
+
+                    if (!systemUserManager.validateUserSession(sessionUser.getUserName(), sessionObj.getId())) {
+                        throw new NewLoginSessionException();
+                    }
+
+                } catch (NewLoginSessionException nlex) {
+                    throw new NewLoginSessionException();
+
+                }
+            } catch (NullPointerException ex) {
+                throw new SesssionExpException();
+            }
+            passBean = new PasswordPolicyBean();
+
+            String maxLength = request.getParameter("maxLength");
+            String minLength = request.getParameter("minLength");
+            String spcl = request.getParameter("minSplCh");
+            String minUpper = request.getParameter("minUpcaseCh");
+            String minNuCh = request.getParameter("minNuCh");
+            String minLwCh = request.getParameter("minLwCh");
+
+            String allowedReptCharacters = request.getParameter("allowedReptCharacters");
+            String passwordExpiryPeriod = request.getParameter("passwordExpiryPeriod");
+            String passwordExpNotifyPeriod = request.getParameter("passwordExpNotifyPeriod");
+            String noOfHistoryPasswords = request.getParameter("noOfHistoryPasswords");
+            String accountExpiryPeriod = request.getParameter("accountExpiryPeriod");
+            String noOfInvalidLoginAtmps = request.getParameter("noOfInvalidLoginAtmps");
+            String firstPassExpiryPeriod = request.getParameter("firstPassExpiryPeriod");
+
+            passBean.setMaxLen(maxLength);
+            passBean.setMinLen(minLength);
+            passBean.setMinSpclCharacterLen(spcl);
+            passBean.setMinUpperCase(minUpper);
+            passBean.setMinNumCharacter(minNuCh);
+            passBean.setMinLowerCaseCharacter(minLwCh);
+            passBean.setAllowedReptCharacters(allowedReptCharacters);
+            passBean.setPasswordExpiryPeriod(passwordExpiryPeriod);
+            passBean.setPasswordExpNotifyPeriod(passwordExpNotifyPeriod);
+            passBean.setNoOfHistoryPasswords(noOfHistoryPasswords);
+            passBean.setAccountExpiryPeriod(accountExpiryPeriod);
+            passBean.setNoOfInvalidLoginAtmps(noOfInvalidLoginAtmps);
+            passBean.setFirstPassExpiryPeriod(Integer.parseInt(firstPassExpiryPeriod));
+
+            newValue = maxLength + "|" + minLength + "|" + spcl + "|" + minUpper + "|" + minNuCh + "|" + allowedReptCharacters + "|" + passwordExpiryPeriod + "|" + passwordExpNotifyPeriod + "|" + noOfHistoryPasswords + "|" + accountExpiryPeriod + "|" + noOfInvalidLoginAtmps + "|" + firstPassExpiryPeriod;
+
+            if (!this.validateInput(request)) {
+                request.setAttribute(MessageVarList.JSP_ERROR, errorMsg);
+            } else {
+                passBean.setLastUpdateuser(sessionUser.getUserName());
+                passBean.setLastUpdateDate(new Date());
+
+                //Here comes update query
+                bean = PasswordPolicyManager.getPasswordPolicyManager().getPasswordPolicyDetails();
+
+                oldValue = bean.getMaxLen() + "|" + bean.getMinLen() + "|" + bean.getMinSpclCharacterLen() + "|" + bean.getMinUpperCase() + "|" + bean.getMinNumCharacter() + "|" + bean.getMinLowerCaseCharacter() + bean.getAllowedReptCharacters() + "|" + bean.getPasswordExpiryPeriod() + "|" + bean.getPasswordExpNotifyPeriod() + "|" + bean.getNoOfHistoryPasswords() + "|" + bean.getAccountExpiryPeriod() + "|" + bean.getNoOfInvalidLoginAtmps() + "|" + bean.getFirstPassExpiryPeriod();
+
+                this.setAudittraceValue(request);
+                int row = PasswordPolicyManager.getPasswordPolicyManager().updatePasswordPolicy(passBean, systemAuditBean);
+
+                if (row == 1) {
+                    request.setAttribute(MessageVarList.JSP_SUCCESS, MessageVarList.PASSPOLICY_UPDATE_SUCCESS);
+                }
+            }
+
+            PasswordPolicyBean passwdPolBean = PasswordPolicyManager.getPasswordPolicyManager().getPasswordPolicyDetails();
+            request.setAttribute(RequestVarList.PASSWORDPOLICY_DETAILS_BEAN, passwdPolBean);
+            request.setAttribute(RequestVarList.PASSWORDPOLICY_UPDATE_BEAN, passBean);
+
+            rd = request.getRequestDispatcher(url);
+        } catch (SesssionExpException sex) {
+            rd = getServletContext().getRequestDispatcher(MessageVarList.SESSION_EXPIRED_URL + MessageVarList.SESSION_EXPIRED);
+        } catch (NewLoginSessionException nlex) {
+            rd = getServletContext().getRequestDispatcher(MessageVarList.SESSION_EXPIRED_URL + MessageVarList.LAST_SESSION_CLOSE);
+        } catch (SQLException ex) {
+            request.setAttribute(MessageVarList.JSP_ERROR, OracleMessage.getMessege(ex.getMessage()));
+            rd = request.getRequestDispatcher(url);
+        } catch (Exception ex) {
+            request.setAttribute(MessageVarList.JSP_ERROR, MessageVarList.UNKNOW_ERROR);
+            rd = request.getRequestDispatcher(url);
+        } finally {
+            rd.forward(request, response);
+        }
+    }
+
+    /**
+     * validate input data for update password policy.if validate alright then
+     * return ture</nr>
+     * otherwise return false
+     *
+     * @param request
+     * @return boolean
+     */
+    private boolean validateInput(HttpServletRequest request) throws Exception {
+        try {
+
+            boolean flag = true;
+
+            int low = 0, upper = 0, numeric = 0, spcl = 0, max = 0, pwExpPeriod = 0, pwdExpNotifyPeriod = 0;
+            passBean.setPolicyID(Integer.parseInt(request.getParameter("id")));
+
+            errorMsg = "";
+
+            if (request.getParameter("maxLength").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_MAXLEN_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setMaxLen(request.getParameter("maxLength"));
+                    max = Integer.parseInt(request.getParameter("maxLength"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_MAXLEN_INVALID;
+                        flag = false;
+                    }
+
+                }
+            }
+
+            if (request.getParameter("minLength").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_MINLEN_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setMinLen(request.getParameter("minLength"));
+                    int minLength = Integer.parseInt(request.getParameter("minLength"));
+                    if (minLength < 4) {
+                        if (errorMsg.isEmpty()) {
+                            flag = false;
+                            errorMsg = MessageVarList.PASSPOLICY_MINLENGHT_LIMIT_ERROR;
+                        }
+                    }
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_MINLEN_INVALID;
+                        flag = false;
+                    }
+                }
+            }
+
+            if (request.getParameter("minSplCh").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_SPCAILCHARACTER_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setMinSpclCharacterLen(request.getParameter("minSplCh"));
+                    spcl = Integer.parseInt(request.getParameter("minSplCh"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_SPCAILCHARACTER_INVALID;
+                        flag = false;
+                    }
+                }
+            }
+
+            if (request.getParameter("minUpcaseCh").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_UPPERCASECHAR_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setMinUpperCase(request.getParameter("minUpcaseCh"));
+                    upper = Integer.parseInt(request.getParameter("minUpcaseCh"));
+
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_UPPERCASECHAR_INVALID;
+                        flag = false;
+                    }
+                }
+            }
+
+            if (request.getParameter("minNuCh").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_NUMERICCHAR_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setMinNumCharacter(request.getParameter("minNuCh"));
+                    numeric = Integer.parseInt(request.getParameter("minNuCh"));
+
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_NUMERICCHAR_INVALID;
+                        flag = false;
+                    }
+                }
+            }
+
+            if (request.getParameter("minLwCh").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_LOWERCASE_NULL;
+                    flag = false;
+                }
+            } else {
+
+                try {
+                    low = Integer.parseInt(request.getParameter("minLwCh"));
+                    passBean.setMinLowerCaseCharacter(request.getParameter("minLwCh"));
+                    low = Integer.parseInt(request.getParameter("minLwCh"));
+
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_LOWERCASE_INVALID;
+                        flag = false;
+                    }
+                }
+            }
+
+            if (max < (low + upper + numeric + spcl)) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_MAXLEN_INVALID_LENGTH;
+                }
+
+                flag = false;
+            }
+
+            //Add validations to  new Fields
+            if (request.getParameter("allowedReptCharacters").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_ALLOWEDREPTCHARACTERS_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setAllowedReptCharacters(request.getParameter("allowedReptCharacters"));
+                    int val = Integer.parseInt(request.getParameter("allowedReptCharacters"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_ALLOWEDREPTCHARACTERS_INVALID;
+                        flag = false;
+                    }
+
+                }
+            }
+
+            if (request.getParameter("passwordExpiryPeriod").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_PASSWORDEXPIRYPERIOD_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setPasswordExpiryPeriod(request.getParameter("passwordExpiryPeriod"));
+                    pwExpPeriod = Integer.parseInt(request.getParameter("passwordExpiryPeriod"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_PASSWORDEXPIRYPERIOD_INVALID;
+                        flag = false;
+                    }
+
+                }
+            }
+
+            if (request.getParameter("passwordExpNotifyPeriod").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_PASSWORDEXPNOTIFYPERIOD_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setPasswordExpNotifyPeriod(request.getParameter("passwordExpNotifyPeriod"));
+                    pwdExpNotifyPeriod = Integer.parseInt(request.getParameter("passwordExpNotifyPeriod"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_PASSWORDEXPNOTIFYPERIOD_INVALID;
+                        flag = false;
+                    }
+
+                }
+            }
+
+            if (request.getParameter("noOfHistoryPasswords").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_NOOFHISTORYPASSWORDS_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setNoOfHistoryPasswords(request.getParameter("noOfHistoryPasswords"));
+                    int val = Integer.parseInt(request.getParameter("noOfHistoryPasswords"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_NOOFHISTORYPASSWORDS_INVALID;
+                        flag = false;
+                    }
+
+                }
+            }
+            if (request.getParameter("accountExpiryPeriod").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_ACCOUNTEXPIRYPERIOD_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setAccountExpiryPeriod(request.getParameter("accountExpiryPeriod"));
+                    int val = Integer.parseInt(request.getParameter("accountExpiryPeriod"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_ACCOUNTEXPIRYPERIOD_INVALID;
+                        flag = false;
+                    }
+
+                }
+            }
+            if (request.getParameter("noOfInvalidLoginAtmps").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_NOOFINVALIDLOGINATMPS_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setNoOfInvalidLoginAtmps(request.getParameter("noOfInvalidLoginAtmps"));
+                    int val = Integer.parseInt(request.getParameter("noOfInvalidLoginAtmps"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_NOOFINVALIDLOGINATMPS_INVALID;
+                        flag = false;
+                    }
+
+                }
+
+                if (pwExpPeriod < pwdExpNotifyPeriod) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_PASSWORDEXPNOTIFYPERIOD_INVALID_LENGTH;
+                    }
+                    flag = false;
+                }
+            }
+
+            if (request.getParameter("firstPassExpiryPeriod").isEmpty()) {
+                if (errorMsg.isEmpty()) {
+                    errorMsg = MessageVarList.PASSPOLICY_FIRSTPASSEXPIRYPERIOD_NULL;
+                    flag = false;
+                }
+            } else {
+                try {
+                    passBean.setNoOfInvalidLoginAtmps(request.getParameter("firstPassExpiryPeriod"));
+                    int val = Integer.parseInt(request.getParameter("firstPassExpiryPeriod"));
+                } catch (Exception e) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_FIRSTPASSEXPIRYPERIOD_NULL;
+                        flag = false;
+                    }
+
+                }
+
+                if (pwExpPeriod < pwdExpNotifyPeriod) {
+                    if (errorMsg.isEmpty()) {
+                        errorMsg = MessageVarList.PASSPOLICY_PASSWORDEXPNOTIFYPERIOD_INVALID_LENGTH;
+                    }
+                    flag = false;
+                }
+            }
+
+            return flag;
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private void setAudittraceValue(HttpServletRequest request) throws Exception {
+
+        try {
+            systemAuditBean = new SystemAuditBean();
+            ////get unique Id from the page.It may be the primary key---------------
+            String uniqueId = request.getParameter("id");
+
+            systemAuditBean.setUserRoleCode(sessionVarlist.getCMSSessionUser().getUserRole());
+            systemAuditBean.setUserName(sessionVarlist.getCMSSessionUser().getUserName());
+            //set unique id
+            systemAuditBean.setUniqueId(uniqueId);
+            //set description 
+            systemAuditBean.setDescription("Update " + uniqueId + " Password Policy  by " + sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setApplicationCode(ApplicationVarList.ADMINISTRATION_APPLICATION);
+            systemAuditBean.setSectionCode(SectionVarList.SYSTEMCONFIGMANAGEMENT);
+            systemAuditBean.setPageCode(PageVarList.PASSWORDPOLICY);
+            systemAuditBean.setTaskCode(TaskVarList.UPDATE);
+            systemAuditBean.setIp(request.getRemoteAddr());
+            //add remarks here
+            systemAuditBean.setRemarks("");
+            //set field name which is being changed(only if)
+            systemAuditBean.setFieldName("");
+            //set old value of change if required
+            systemAuditBean.setOldValue(oldValue);
+            //set new value of change if required
+            systemAuditBean.setNewValue(newValue);
+
+            systemAuditBean.setLastUpdateduser(sessionVarlist.getCMSSessionUser().getUserName());
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

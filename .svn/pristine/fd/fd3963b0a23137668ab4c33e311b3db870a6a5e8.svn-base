@@ -1,0 +1,135 @@
+body,td,th {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: small;
+}
+body {
+    margin-left: 0px;
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+}
+.notificationBox:hover {
+
+    background-color:#FF9900;
+
+}
+
+.linkTree:hover{
+    text-decoration:underline;
+    font-weight: bold;
+    color: #FF9900;
+}
+
+.linkTree{
+    text-decoration:none;
+}
+
+#popDiv {
+    background-image: url(resources/images/bg.png);
+    background-repeat: repeat;
+    padding: 25px;
+    height: 100%;
+    width: 100%;
+    display: none;
+    position: absolute;
+}
+#headDiv h2 {
+    padding:0;
+    margin:0;
+    color: #ebebeb;
+    font: bold 30px "Calibri", Arial;
+}
+.glossymenu{
+    margin: 5px 0;
+    padding: 0;
+    width: 200px; /*width of menu*/
+    border: 1px solid #9A9A9A;
+    border-bottom-width: 0;
+
+    /*                -moz-box-shadow:    3px 3px 5px 6px #ccc;
+                    -webkit-box-shadow: 3px 3px 5px 6px #ccc;
+                    box-shadow:         3px 3px 5px 6px #ccc;*/
+    border-left:solid 1px #999999; border-right:solid 1px #999999;
+    border-bottom:solid 1px #999999; border-top:dotted 1px #CCCCCC;
+    background: #7F6C5D;
+}
+
+.glossymenu a.menuitem{
+    background: linear-gradient(to right, #C8BDAE, #FFFFFF);
+    font-family: arial,sans-serif;
+    font-size: small;
+    color: #3F2C1C;
+    display: block;
+    position: relative;/*To help in the anchoring of the ".statusicon" icon image*/
+    width: auto;
+    padding: 4px 0;
+    padding-left: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid #FFFFFF;
+}
+
+.submenu{
+    background: white;
+    font-family: arial,sans-serif;
+    font-size: small;
+    color: #24A0E6;
+    display: block;
+    position: relative; /*To help in the anchoring of the ".statusicon" icon image*/
+    width: auto;
+    padding: 4px 0;
+    padding-left: 10px;
+    text-decoration: none;
+}
+
+
+
+.glossymenu a.menuitem:visited, .glossymenu .menuitem:active{
+    color: #3F2C1C;
+}
+
+.glossymenu a.menuitem .statusicon{ /*CSS for icon image that gets dynamically added to headers*/
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border: none;
+}
+
+.glossymenu a.menuitem:hover{
+    background: white;
+}
+
+.glossymenu div.submenu{ /*DIV that contains each sub menu*/
+    background: linear-gradient(to right, #DBD1C7, #FFFFFF);
+
+}
+
+.glossymenu div.submenu ul{ /*UL of each sub menu*/
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    /*                                         background-image: url(${pageContext.request.contextPath}/resources/images/glossyback21.gif);*/
+}
+
+.glossymenu div.submenu ul li{
+    border-bottom: 1px solid blue;
+
+}
+
+.glossymenu div.submenu ul li a{
+    display: block;
+    font-family: arial,sans-serif;
+    font-size: small;
+    color: #3F2C1C;
+    text-decoration: none;
+    padding: 2px 0;
+    padding-left: 10px;
+}
+
+.glossymenu div.submenu ul li a:hover{
+    background: white;
+    /* background-image: url(${pageContext.request.contextPath}/resources/images/glossyback21.gif);*/
+    colorz: white;
+}
+font{
+    color: #FFFFFF;
+}

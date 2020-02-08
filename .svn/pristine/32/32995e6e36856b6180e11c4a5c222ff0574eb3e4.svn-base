@@ -1,0 +1,290 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.backoffice.cardstandingorder.businesslogic;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemAuditManager;
+import com.epic.cms.backoffice.cardstandingorder.bean.CardDetailsBean;
+import com.epic.cms.backoffice.cardstandingorder.bean.CardStandingOrderBean;
+import com.epic.cms.backoffice.cardstandingorder.persistance.CardStandingOrderPersistance;
+import com.epic.cms.system.util.config.DBConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ *
+ * @author badrika
+ */
+public class CardStandingOrderManager {
+
+    private Connection CMSCon;
+    private CardStandingOrderPersistance perObj;
+    private HashMap<String, String> currencyList;
+    private HashMap<String, String> orderTypeList;
+    private CardDetailsBean bean;
+    private int orderId;
+    private SystemAuditManager sysAuditManager;
+
+    public HashMap<String, String> getAllCurrencyList() throws Exception {
+        try {
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            currencyList = perObj.getAllCurrencyList(CMSCon);
+            CMSCon.commit();
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return currencyList;
+    }
+
+    public HashMap<String, String> getAllStandingOrderTypeList() throws Exception {
+        try {
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            orderTypeList = perObj.getAllStandingOrderTypeList(CMSCon);
+            CMSCon.commit();
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return orderTypeList;
+    }
+
+    public CardDetailsBean getCardDetails(String cardnum) throws Exception {
+        try {
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            bean = perObj.getCardDetails(CMSCon, cardnum);
+            CMSCon.commit();
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return bean;
+    }
+
+    public CardDetailsBean getMinMaxAmount(String ordertype) throws Exception {
+        try {
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            bean = perObj.getMinMaxAmount(CMSCon, ordertype);
+            CMSCon.commit();
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return bean;
+    }
+
+    public int addNewStandingOrder(SystemAuditBean systemAuditBean, CardStandingOrderBean bean) throws Exception {
+        int i = -1;
+        try {
+            sysAuditManager = new SystemAuditManager();
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            i = perObj.addNewStandingOrder(CMSCon, bean);
+            sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+
+            CMSCon.commit();
+
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return i;
+    }
+
+    public int updateStandingOrder(SystemAuditBean systemAuditBean, CardStandingOrderBean bean) throws Exception {
+        int i = -1;
+        try {
+            sysAuditManager = new SystemAuditManager();
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            i = perObj.updateStandingOrder(CMSCon, bean);
+            sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+
+            CMSCon.commit();
+
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return i;
+    }
+
+    public int deleteStandingOrder(SystemAuditBean systemAuditBean, String orderId) throws Exception {
+        int i = -1;
+        try {
+            sysAuditManager = new SystemAuditManager();
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            i = perObj.deleteStandingOrder(CMSCon, orderId);
+            sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+
+            CMSCon.commit();
+
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return i;
+    }
+
+    public List<CardStandingOrderBean> getAllOrderLists() throws SQLException, Exception {
+
+        try {
+            List<CardStandingOrderBean> orderList = null;
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            orderList = perObj.getAllOrderLists(CMSCon);
+
+            CMSCon.commit();
+            return orderList;
+        } catch (Exception e) {
+            try {
+                CMSCon.rollback();
+                throw e;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public int getOrderId() throws Exception {
+        try {
+            perObj = new CardStandingOrderPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            orderId = perObj.getOrderId(CMSCon);
+            CMSCon.commit();
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return orderId;
+    }
+}

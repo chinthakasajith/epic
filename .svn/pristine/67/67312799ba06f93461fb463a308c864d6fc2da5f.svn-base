@@ -1,0 +1,176 @@
+<%-- 
+    Document   : customersearch
+    Created on : Jul 17, 2012, 10:09:01 AM
+    Author     : janaka_h
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Customer Search</title>
+        <script type="text/javascript">
+            function reset() {
+
+
+                $("#serachtype").val("card");
+                $("#card").val("");
+                $("#idtype").val("");
+                $("#nic").val("");
+
+
+//                window.location = "${pageContext.request.contextPath}/LoadCallCenterMgtServlet";
+//                alert("hhgfhgh");
+            }
+
+            var inc = 0;
+            function showme() {
+                inc = inc + 1;
+
+                if (inc % 2 === 1) {
+                    $(".hideme").show();
+                }
+                else {
+                    $(".hideme").hide();
+                }
+            }
+
+            function hideme() {
+                $(".hideme").hide();
+
+            }
+
+            function basicSearch() {
+                document.searchform.action = "${pageContext.request.contextPath}/LoadQuestionVerifyPageServlet";
+                document.searchform.submit();
+
+            }
+
+            function advancedSearch() {
+                document.adsearchform.action = "${pageContext.request.contextPath}/SearchAdvancedServlet";
+                document.adsearchform.submit();
+
+            }
+
+        </script>
+        <style type="text/css">
+            td,th{
+                color: #3F2C1C;
+            }
+        </style>
+    </head>
+    <body > 
+        <form name="searchform" method="post" action="${pageContext.request.contextPath}/LoadQuestionVerifyPageServlet">
+
+            <!--<table > <tr> <td   class="center"> CALL CENTER SEARCH </td> </tr><tr> <td>&nbsp;</td> </tr></table>-->
+            <table>
+                <tr>
+                    <td style="color: #FFFFFF">
+                        <label style="color: #FFFFFF">Basic Search</label>
+                    </td>
+
+
+                </tr>
+
+                <tr>
+                    <td style="color: #FFFFFF">
+                        <input type="radio" name="serachtype" id="card" value="card" checked=""/> Card
+                        <input type="radio" name="serachtype" id="account" value="account" /> Account
+                    </td>
+
+
+                </tr>
+                <tr style="color: #FFFFFF">
+                    <td><input type="text" name="searchvalue" class="textField" id="card" value="${searchbean.searchvalue}" maxlength="20"/></td>
+                </tr>
+                <tr>
+                    <td style="color: #FFFFFF">                        
+                        <input type="radio" name="idtype" value="nic" id="nic" checked=""/> NIC 
+                        <input type="radio" name="idtype" value="cif" id="cif"/> CIF 
+                        <input type="radio" name="idtype" value="passport" id="passport"/> Passport 
+                    </td>
+                </tr>               
+
+                <tr>
+                    <td style="color: #FFFFFF"><input type="text" name="idnumber" class="textField" id="nic" value="${searchbean.idnumber}" maxlength="12" /></td>
+                </tr>               
+                <tr>                    
+
+                </tr>
+                <tr>
+                    <!--                    <td colspan="2"><center><input type="submit" name="" style="width:100px;" value="Search" /></center></td>-->
+                    <td>
+                        <input type="submit" onclick="basicSearch()" name="" style="width:100px;" value="Search" />
+                        <!--<input type="button" name="" style="width:100px;" value="Advanced" onclick="showme()"/>-->
+                    </td>
+                </tr>
+
+                <tr style="height: 10px;">                    
+
+                </tr>
+
+            </table>
+
+        </form>
+
+
+
+        <form name="adsearchform" method="post" action="${pageContext.request.contextPath}/SearchAdvancedServlet">
+            <table>
+                
+<!--                <tr>
+                                                <c:if test="${adsearchbean.adsearchtype =='adname'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adname" checked="true"/></td></c:if>
+                                                <c:if test="${adsearchbean.adsearchtype !='adname'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adname" /></td></c:if>
+                                                <td>Name</td>
+                                            </tr>
+                                            <tr>
+                                                <c:if test="${adsearchbean.adsearchtype =='adcard'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adcard" checked="true"/></td></c:if>
+                                                <c:if test="${adsearchbean.adsearchtype !='adcard'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adcard" /></td></c:if>
+                                                <td>Card</td>
+                                            </tr>
+                                            <tr>
+                                                <c:if test="${adsearchbean.adsearchtype =='adnic'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adnic" checked="true"/></td></c:if>
+                                                <c:if test="${adsearchbean.adsearchtype !='adnic'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adnic" /></td></c:if>
+                                                <td>NIC</td>
+                                            </tr>
+                                            <tr>
+                                                <c:if test="${adsearchbean.adsearchtype =='adpassport'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adpassport" checked="true"/></td></c:if>
+                                                <c:if test="${adsearchbean.adsearchtype !='adpassport'}"><td>  <input style="width: 25px" type="radio" name="adsearchtype" value="adpassport"/></td></c:if>
+                                                <td>Passport</td>-->
+                    <tr>
+                        <td style="color: #FFFFFF">
+                        <label style="color: #FFFFFF">Advanced Search</label>
+                    </td>
+                    </tr>
+                
+                <tr >
+                    <td style="color: #FFFFFF">
+                        
+                        
+                        
+                        <input type="radio" name="adsearchtype" value="adname" id="" checked=""/> Name <br/>    
+                        <input type="radio" name="adsearchtype" value="adcard" id="" /> Card <br/>
+                        <input type="radio" name="adsearchtype" value="adnic" id=""/> NIC <br/>
+                        <input type="radio" name="adsearchtype" value="adpassport" id=""/> Passport <br/>
+                    </td>
+                </tr>               
+
+                <tr >
+                    <td style="color: #FFFFFF"><input type="text" name="adsearchval" class="textField" id="adsearchval" value="${adsearchbean.adsearchval}" maxlength="20" /></td>
+                </tr>
+
+                <tr>
+                    <!--                    <td colspan="2"><center><input type="submit" name="" style="width:100px;" value="Search" /></center></td>-->
+                    <td>                        
+                        <input type="button" name="" style="width:100px;" value="Search" onclick="advancedSearch()"/>
+                    </td>
+                </tr>
+
+
+            </table>
+
+        </form>
+    </body>
+</html>

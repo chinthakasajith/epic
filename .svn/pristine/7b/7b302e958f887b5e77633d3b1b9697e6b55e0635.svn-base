@@ -1,0 +1,368 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.backoffice.payment.servlet;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemUserBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.backoffice.payment.bean.PaymentBatchBean;
+import com.epic.cms.backoffice.payment.bean.PaymentBean;
+import com.epic.cms.backoffice.payment.businesslogic.PaymentManager;
+import com.epic.cms.system.util.exception.AccessDeniedException;
+import com.epic.cms.system.util.exception.NewLoginSessionException;
+import com.epic.cms.system.util.exception.SesssionExpException;
+import com.epic.cms.system.util.security.CMSMd5;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.variable.ApplicationVarList;
+import com.epic.cms.system.util.variable.MessageVarList;
+import com.epic.cms.system.util.variable.OracleMessage;
+import com.epic.cms.system.util.variable.PageVarList;
+import com.epic.cms.system.util.variable.SectionVarList;
+import com.epic.cms.system.util.variable.TaskVarList;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author badrika
+ */
+public class AddNewBatchServlet extends HttpServlet {
+
+    private SystemUserManager systemUserManager;
+    private SessionVarList sessionVarlist;
+    private SessionUser sessionUser;
+    //private String url = "/backoffice/payment/paymentjsp.jsp";//createbatchjsp
+    private String url = "/backoffice/payment/createbatchjsp.jsp";
+    private RequestDispatcher rd;
+    private List<String> userTaskList;
+    private PaymentBatchBean batchBean;
+    private SystemUserBean CMSSysUser;
+    private SystemUserBean valideUser = null;
+    private SystemUserManager userManager;
+    private String ip;
+    private int batId = 0;
+    private SystemAuditBean systemAuditBean;
+    private List<PaymentBatchBean> todBatchList;
+    private String oldId = "";
+    private String oldDdigit = "";
+    private String newDigit = "";
+    private PaymentBean bean;
+    private PaymentBatchBean lastBatch;
+    private PaymentBatchBean userLastBatch;
+    private PaymentBatchBean ipLastBatch;
+
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+
+        try {
+            //call to existing session
+            HttpSession sessionObj = request.getSession(false);
+            try {
+                systemUserManager = new SystemUserManager();
+                sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+                sessionUser = sessionVarlist.getCMSSessionUser();
+                //check system user is in same session or not
+                try {
+                    if (!systemUserManager.validateUserSession(sessionUser.getUserName(), sessionObj.getId())) {
+                        //useer not in same session.
+                        throw new NewLoginSessionException();
+                    }
+                } catch (NewLoginSessionException nlex) {
+                    //throw lst login close exception
+                    throw new NewLoginSessionException();
+                }
+            } catch (NullPointerException ex) {
+                //throw session null exception
+                throw new SesssionExpException();
+            }
+            try {
+                //set page code and task codes
+                String pageCode = PageVarList.BO_PAYMENT;
+                String taskCode = TaskVarList.ADD;
+
+                //check whether userrole have an access for this page and task
+                if (this.isValidAccess(sessionUser.getUserRole(), pageCode, taskCode)) {
+
+                    PaymentManager manager = new PaymentManager();
+
+                    bean = new PaymentBean();
+                    bean.setBatchId(oldId);
+
+                    InetAddress inetAddress = InetAddress.getLocalHost();
+                    //Get a string representation of the ip address  
+                    ip = inetAddress.getHostAddress();
+
+
+
+                    if (request.getParameter("password").equals("") || request.getParameter("password").length() <= 0) {
+                        request.setAttribute("errorMsg", "Enter Password");
+
+                        request.setAttribute("bean1", bean);
+                        request.setAttribute("date", new Timestamp(new Date().getTime()));
+                        request.setAttribute("user", sessionUser.getUserName());
+
+                        todBatchList = manager.getAllBatchDetailsForToday(ip);
+                        request.setAttribute("todBatchList", todBatchList);
+
+                        rd = getServletContext().getRequestDispatcher(url);
+                    }
+
+                    try {
+
+                        String userName = request.getParameter("username");
+                        String password = CMSMd5.cmsMd5(request.getParameter("password"));
+                        CMSSysUser = new SystemUserBean();
+                        CMSSysUser.setUserName(userName);
+                        CMSSysUser.setPassword(password);
+
+                        valideUser = validateUser(CMSSysUser);
+                        if (valideUser != null) {
+
+                            String day = "";
+
+                            lastBatch = manager.getLastBatchInfo(ip, userName);
+                    //        userLastBatch = manager.getLastBatchInfoUser(userName);
+                    //        ipLastBatch = manager.getLastBatchInfoIp(ip);
+
+                            oldId = String.valueOf(manager.getMaxBatchId());
+
+                            if (!oldId.equals("0")) {
+                                day = oldId.substring(0, 6);
+                                oldDdigit = oldId.substring(6);
+                                newDigit = String.valueOf(Integer.parseInt(oldDdigit) + 1);
+
+                            } else {
+                                newDigit = "0001";
+                            }
+
+
+                            if (newDigit.length() == 1) {
+                                newDigit = "000" + newDigit;
+                            } else if (newDigit.length() == 2) {
+                                newDigit = "00" + newDigit;
+                            } else if (newDigit.length() == 3) {
+                                newDigit = "0" + newDigit;
+                            }
+
+                            SimpleDateFormat df = new SimpleDateFormat("yyMMdd");
+
+                            Date today = new Date();
+                            //  Date dayday = df.parse(day);
+
+                            String today1 = df.format(today);
+
+                            if (day.equals(today1)) {
+                                batId = Integer.parseInt(day + newDigit);
+
+                            } else {
+                                batId = Integer.parseInt(today1 + "0001");
+                            }
+
+                            this.setAudittraceValue(request);
+
+                            todBatchList = manager.getAllBatchDetailsForToday(ip);
+                            request.setAttribute("todBatchList", todBatchList);
+
+                            //   lastBatch = manager.getLastBatchInfo(ip, userName);
+
+                            if (lastBatch.getStatus() == null) {
+                                lastBatch.setStatus("NO");
+                            }
+
+                            try {
+                                int successInsert = -1;
+                                   
+                                if (!lastBatch.getStatus().equals("BMOP")) {
+
+                                    //insert the user given values to the MCC table
+                                    successInsert = manager.insertNewBatch(systemAuditBean, batId, ip, userName);
+                                }
+
+                                if (successInsert > 0) {
+                                    request.setAttribute("successMsg", "Successfully added payment batch ");
+                                    rd = getServletContext().getRequestDispatcher("/LoadPaymentAndBatchServlet?param=resume");
+                                    // rd.include(request, response);
+                                }
+
+                            } catch (SQLException e) {
+
+                                OracleMessage message = new OracleMessage();
+                                String oraMessage = message.getMessege(e.getMessage());
+                                request.setAttribute("errorMsg", oraMessage);
+                                rd = getServletContext().getRequestDispatcher(url);
+                                // rd.forward(request, response);
+                            }
+                        } else {
+                            request.setAttribute("errorMsg", "Password Invalid ");
+
+                            request.setAttribute("bean1", bean);
+                            request.setAttribute("date", new Timestamp(new Date().getTime()));
+                            request.setAttribute("user", sessionUser.getUserName());
+
+                            todBatchList = manager.getAllBatchDetailsForToday(ip);
+                            request.setAttribute("todBatchList", todBatchList);
+
+                            rd = getServletContext().getRequestDispatcher(url);
+
+                        }
+
+                    } catch (Exception e) {
+                        request.setAttribute("errorMsg", MessageVarList.UNKNOW_ERROR);
+                        rd = getServletContext().getRequestDispatcher(url);
+
+                    }
+
+                } else {
+                    throw new AccessDeniedException();
+                }
+                //set tasks to the session
+                sessionVarlist.setUserPageTaskList(userTaskList);
+            } catch (AccessDeniedException adex) {
+                //if user_role doesn't have required access to the page throw Access Denied exception
+                throw adex;
+            }
+        } //catch session exception
+        catch (SesssionExpException sex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.SESSION_EXPIRED);
+
+
+        } //catch session exception
+        catch (NewLoginSessionException nlex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.LAST_SESSION_CLOSE);
+
+        } catch (AccessDeniedException adex) {
+            //redirect to login page
+            rd = getServletContext().getRequestDispatcher("/administrator/controlpanel/login/login.jsp?message=" + MessageVarList.ACCESS_DENIED_TASK);
+
+        } catch (Exception ex) {
+        } finally {
+            rd.forward(request, response);
+
+        }
+    }
+
+    private boolean isValidAccess(String userrole, String pagecode, String task) throws Exception {
+        boolean isValidTaskAccess = false;
+
+        try {
+            systemUserManager = new SystemUserManager();
+
+            //get all tasks for userrole for this page
+            userTaskList = systemUserManager.getTasksByPageCodeAndUserRole(userrole, pagecode);
+
+            for (String usertask : userTaskList) {
+
+                if (task.equals(usertask)) {
+                    isValidTaskAccess = true;
+                }
+            }
+            return isValidTaskAccess;
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    private SystemUserBean validateUser(SystemUserBean CMSSysUser) throws Exception {
+        SystemUserBean valideTempUser = null;
+        userManager = new SystemUserManager();
+        valideTempUser = userManager.validateUser(CMSSysUser);
+        return valideTempUser;
+    }
+
+    private void setAudittraceValue(HttpServletRequest request) throws Exception {
+
+        try {
+            systemAuditBean = new SystemAuditBean();
+            ////get unique Id from the page.It may be the primary key---------------
+            String uniqueId = String.valueOf(batId);
+
+            systemAuditBean.setUserRoleCode(sessionVarlist.getCMSSessionUser().getUserRole());
+            systemAuditBean.setUserName(sessionVarlist.getCMSSessionUser().getUserName());
+            //set unique id
+            systemAuditBean.setUniqueId(uniqueId);
+            //set description
+            systemAuditBean.setDescription("Add Payment Batch. Batch ID: " + uniqueId + "; by: " + sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setApplicationCode(ApplicationVarList.BACK_OFFICE);
+            systemAuditBean.setSectionCode(SectionVarList.PAYMENT);
+            systemAuditBean.setPageCode(PageVarList.BO_PAYMENT);
+            systemAuditBean.setTaskCode(TaskVarList.ADD);
+            systemAuditBean.setIp(request.getRemoteAddr());
+            //add remarks here
+            systemAuditBean.setRemarks(uniqueId);
+            //set field name which is being changed(only if)
+            systemAuditBean.setFieldName("");
+            //set old value of change if required
+            systemAuditBean.setOldValue("");
+            //set new value of change if required
+            systemAuditBean.setNewValue("");
+
+
+            systemAuditBean.setLastUpdateduser(sessionVarlist.getCMSSessionUser().getUserName());
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

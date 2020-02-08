@@ -1,0 +1,313 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.cpmm.requestconfirmation.businesslogic;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemAuditManager;
+import com.epic.cms.admin.controlpanel.transactionmgt.bean.FeeBean;
+import com.epic.cms.admin.controlpanel.transactionmgt.businesslogic.FeeMgtManager;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CustomerPersonalBean;
+import com.epic.cms.cpmm.requestconfirmation.bean.CustomerContactDetailsChangeBean;
+import com.epic.cms.cpmm.requestconfirmation.bean.RequestConfirmationBean;
+import com.epic.cms.cpmm.requestconfirmation.persistance.RequestConfirmationPersistance;
+import com.epic.cms.system.util.config.DBConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ *
+ * @author nisansala
+ */
+public class RequestConfirmationManager {
+
+    private Connection CMSCon;
+    private Connection onlineCMSCon;
+    private RequestConfirmationBean card = null;
+    private List<RequestConfirmationBean> requestList;
+    List<RequestConfirmationBean> searchHistory;
+    private RequestConfirmationPersistance reqConfPer;
+    private HashMap<String, String> approveStatus;
+    SystemAuditManager sysAuditManager = null;
+    FeeMgtManager feemgr = null;
+
+    public HashMap<String, String> getApproveStatus() throws Exception {
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            approveStatus = reqConfPer.getApproveStatus(CMSCon);
+            CMSCon.commit();
+        } catch (Exception ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return approveStatus;
+    }
+
+    public List<RequestConfirmationBean> searchRequests(RequestConfirmationBean inputBean) throws SQLException, Exception {
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            requestList = reqConfPer.searchRequests(CMSCon, inputBean);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return requestList;
+    }
+
+    public RequestConfirmationBean viewOneRequest(String cardNo, String operation) throws SQLException, Exception {
+        RequestConfirmationBean reqBean;
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            reqBean = reqConfPer.viewOneRequest(CMSCon, cardNo, operation);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return reqBean;
+    }
+
+    public int approveRequest(RequestConfirmationBean confBean, String approveStatus, String operation, FeeBean fee, SystemAuditBean systemAuditBean) throws SQLException, Exception {
+        int row, row1, success = -1;
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            feemgr = new FeeMgtManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            row = reqConfPer.approveRequest(confBean, approveStatus, operation, CMSCon);
+            row1 = feemgr.feeCountMgt(fee);
+
+            sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        if (row == 1 && row1 == 1) {
+            success = 1;
+
+        }
+        return success;
+    }
+
+    public int requsetReject(RequestConfirmationBean confBean, String operation) throws SQLException, Exception {
+        int success = -1;
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            feemgr = new FeeMgtManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            success = reqConfPer.requsetReject(confBean, operation, CMSCon);
+
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return success;
+    }
+
+    public List<RequestConfirmationBean> searchHistory(RequestConfirmationBean confBean) throws SQLException, Exception {
+
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            searchHistory = reqConfPer.searchHistory(CMSCon, confBean);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return searchHistory;
+
+    }
+
+    public List<CustomerContactDetailsChangeBean> loadChangedCustomerContactDetaisList(String cardNo, String applicationId, String identificationNumber) throws Exception{
+        List<CustomerContactDetailsChangeBean> list = new ArrayList<CustomerContactDetailsChangeBean>();
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            list = reqConfPer.loadChangedCustomerContactDetaisList(CMSCon,cardNo,applicationId,identificationNumber);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return list;
+
+    }
+
+    public List loadChangedCustomerContactDetaisList(Integer requestId) throws Exception {
+        
+        List list = new ArrayList<CustomerContactDetailsChangeBean>();
+        try {
+            reqConfPer = new RequestConfirmationPersistance();
+            sysAuditManager = new SystemAuditManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            list = reqConfPer.loadChangedCustomerContactDetaisList(CMSCon,requestId);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+        return list;
+    }
+}

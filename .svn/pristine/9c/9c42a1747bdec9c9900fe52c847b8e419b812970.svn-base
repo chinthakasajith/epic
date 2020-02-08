@@ -1,0 +1,402 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.backoffice.payment.servlet;
+
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemUserBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemUserManager;
+import com.epic.cms.admin.controlpanel.transactionmgt.bean.CurrencyBean;
+import com.epic.cms.backoffice.payment.bean.PaymentBatchBean;
+import com.epic.cms.backoffice.payment.bean.PaymentBean;
+import com.epic.cms.backoffice.payment.businesslogic.PaymentManager;
+import com.epic.cms.camm.applicationconfig.creditscore.businesslogic.CardScoreManager;
+import com.epic.cms.system.util.exception.AccessDeniedException;
+import com.epic.cms.system.util.exception.NewLoginSessionException;
+import com.epic.cms.system.util.exception.SesssionExpException;
+import com.epic.cms.system.util.exception.ValidateException;
+import com.epic.cms.system.util.security.CMSMd5;
+import com.epic.cms.system.util.session.SessionUser;
+import com.epic.cms.system.util.session.SessionVarList;
+import com.epic.cms.system.util.session.SessionVarName;
+import com.epic.cms.system.util.variable.ApplicationVarList;
+import com.epic.cms.system.util.variable.MessageVarList;
+import com.epic.cms.system.util.variable.OracleMessage;
+import com.epic.cms.system.util.variable.PageVarList;
+import com.epic.cms.system.util.variable.SectionVarList;
+import com.epic.cms.system.util.variable.StatusVarList;
+import com.epic.cms.system.util.variable.TaskVarList;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author badrika
+ */
+public class LoadPaymentAndBatchServlet extends HttpServlet {
+
+    private SystemUserManager systemUserManager;
+    private PaymentManager manager;
+    private SessionVarList sessionVarlist;
+    private SessionUser sessionUser;
+    private String url = "/backoffice/payment/loginjsp.jsp";
+    private String url2 = "/backoffice/payment/createbatchjsp.jsp";
+    private String url3 = "/backoffice/payment/paymentjsp.jsp";
+    private String url4 = "/backoffice/payment/voidlogin.jsp";
+    private RequestDispatcher rd;
+    private List<String> userTaskList;
+    private String ip = "";
+    private String user = "";
+    private String param = "";
+    private List<CurrencyBean> currencyList;
+    private HashMap<String, String> banklist = null;
+    private SystemAuditBean systemAuditBean;
+    private List<PaymentBatchBean> todBatchList;
+    private List<PaymentBean> paymentList;
+    private PaymentBatchBean batchbean;
+    private SystemUserBean CMSSysUser;
+    private SystemUserManager userManager;
+    private SystemUserBean valideUser;
+    private PaymentBatchBean userLastBatch;
+    private PaymentBatchBean ipLastBatch;
+
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+
+        try {
+            HttpSession sessionObj = request.getSession(false);
+            try {
+
+                systemUserManager = new SystemUserManager();
+                sessionVarlist = (SessionVarList) sessionObj.getAttribute(SessionVarName.SESSION_OBJ);
+                sessionUser = sessionVarlist.getCMSSessionUser();
+
+            } catch (NullPointerException ex) {
+                throw new SesssionExpException();
+            }
+            try {
+                if (!systemUserManager.validateUserSession(sessionUser.getUserName(),
+                        sessionObj.getId())) {
+                    throw new NewLoginSessionException();
+                }
+            } catch (NewLoginSessionException nlex) {
+                throw new NewLoginSessionException();
+            }
+
+            try {
+                //set page code and task codes
+                String pageCode = PageVarList.BO_PAYMENT;
+                String taskCode = TaskVarList.ACCESSPAGE;
+
+                if (this.isValidAccess(sessionUser.getUserRole(), pageCode, taskCode)) {
+                } else {
+                    throw new AccessDeniedException();
+                }
+
+                sessionVarlist.setUserPageTaskList(userTaskList);
+
+            } catch (AccessDeniedException adex) {
+                throw adex;
+            }
+
+            //////////////////////////////////////////////
+
+            //Get an instance of InetAddress for the local computer  
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            //Get a string representation of the ip address  
+            ip = inetAddress.getHostAddress();
+
+            user = sessionUser.getUserName();
+
+            PaymentBatchBean lastBatch = new PaymentBatchBean();
+
+            try {
+                manager = new PaymentManager();
+                lastBatch = manager.getLastBatchInfo(ip, user);
+                userLastBatch = manager.getLastBatchInfoUser(ip, user);
+                ipLastBatch = manager.getLastBatchInfoIp(ip, user);
+                
+                batchbean = manager.PaymentsOfBatch(lastBatch.getBatchId());
+
+            } catch (SQLException e) {
+
+                OracleMessage message = new OracleMessage();
+                String oraMessage = message.getMessege(e.getMessage());
+                request.setAttribute("errorMsg", oraMessage);
+                rd = getServletContext().getRequestDispatcher(url);
+
+            }
+
+            if(userLastBatch.getBatchId() != null && !userLastBatch.getStatus().equals("BMRE")){
+                lastBatch.setStatus("UIN");
+            }
+            if(ipLastBatch.getBatchId() != null && !ipLastBatch.getStatus().equals("BMRE")){
+                lastBatch.setStatus("IPIN");
+            }
+            
+            request.setAttribute("bean1", lastBatch);
+            request.setAttribute("userLastBatch", userLastBatch);
+
+            rd = getServletContext().getRequestDispatcher(url);
+
+            param = request.getParameter("param");
+
+            if (param != null && param.equals("newBat")) {
+
+                request.setAttribute("bean1", lastBatch);
+                request.setAttribute("date", new Timestamp(new Date().getTime()));
+                request.setAttribute("user", user);
+
+                todBatchList = manager.getAllBatchDetailsForToday(ip);
+                request.setAttribute("todBatchList", todBatchList);
+
+                rd = request.getRequestDispatcher(url2); //url2 -> url3
+
+            } else if (param != null && param.equals("resume")) {
+
+                request.setAttribute("bean1", lastBatch);
+                request.setAttribute("date", new Timestamp(new Date().getTime()));
+
+                currencyList = manager.getAllCurrencyLst();
+                request.setAttribute("currencyList", currencyList);
+
+                banklist = manager.getAllBankList();
+                request.setAttribute("banklist", banklist);
+
+                paymentList = manager.getAllPaymentDetails(lastBatch.getBatchId());
+                request.setAttribute("paymentList", paymentList);
+                
+                request.setAttribute("batchbean", batchbean);
+
+                if (!lastBatch.getStatus().equals("BMCL")) {
+                    rd = request.getRequestDispatcher(url3);
+                }
+
+            } 
+            else if (param != null && param.equals("reschek")) {
+
+                request.setAttribute("operationtype", "check");
+                request.setAttribute("user", user);
+                rd = request.getRequestDispatcher(url4);
+
+            }
+            else if(param != null && param.equals("resconf")){
+               // String userName = request.getParameter("username");
+                        String password = CMSMd5.cmsMd5(request.getParameter("password"));
+                        CMSSysUser = new SystemUserBean();
+                        CMSSysUser.setUserName(user);
+                        CMSSysUser.setPassword(password);
+                        
+                        valideUser = validateUser(CMSSysUser);
+                        if (valideUser != null){
+                            
+                            String exptime = manager.gatbatchExptime(lastBatch.getBatchId());
+                            
+                            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            Date exp = df.parse(exptime);          
+          
+
+                            Date today = new Date();
+                            Date thistime = new Date(today.getTime());
+                            
+                          //  batchbean = manager.PaymentsOfBatch(bean.getBatchId());
+
+                            if (exp.before(thistime)) {
+                                
+                                request.setAttribute("exp", "exp");
+                                request.setAttribute("errorMsg", "Batch expired, close the batch and create new batch ");
+                                lastBatch.setStatus("EXP");
+                                request.setAttribute("bean1", lastBatch);                                
+                                request.setAttribute("batchbean", batchbean);
+                                rd = getServletContext().getRequestDispatcher(url);
+
+                            }else{
+                                request.setAttribute("successMsg", "Successfully resumed payment batch ");
+                                rd = getServletContext().getRequestDispatcher("/LoadPaymentAndBatchServlet?param=resume");
+                            
+                            }
+                            
+                        } else{
+                            
+                            request.setAttribute("operationtype", "check");
+                            request.setAttribute("errorMsg", "Username or password invalid ");
+                            request.setAttribute("user", user);
+                            rd = request.getRequestDispatcher(url4);
+                        } 
+                        
+                        
+            }
+
+            else if (param != null && param.equals("close")) {
+
+                request.setAttribute("bean1", lastBatch);
+                request.setAttribute("date", new Timestamp(new Date().getTime()));
+                request.setAttribute("user", user);
+
+                this.setAudittraceValue(request, lastBatch.getBatchId());
+                int closebat = -1;
+                if (lastBatch.getStatus().equals("BMOP")) {
+                    closebat = manager.closeBatch(systemAuditBean, lastBatch.getBatchId(), user, batchbean);
+                }
+
+                try {
+                    if (closebat > 0) {
+                        request.setAttribute("successMsg", "Successfully closed payment batch ");
+                        rd = request.getRequestDispatcher("/LoadPaymentAndBatchServlet?param=no");
+
+                    }
+                } catch (Exception e) {
+                    throw e;
+                }
+
+            }
+            
+            /////////////////////////////////////////////////////////////////////
+        } catch (SesssionExpException sex) {
+            rd = getServletContext().getRequestDispatcher(MessageVarList.SESSION_EXPIRED_URL
+                    + MessageVarList.SESSION_EXPIRED);
+        } catch (NewLoginSessionException nlex) {
+            rd = getServletContext().getRequestDispatcher(MessageVarList.SESSION_EXPIRED_URL
+                    + MessageVarList.LAST_SESSION_CLOSE);
+        } catch (AccessDeniedException adex) {
+            request.setAttribute(MessageVarList.JSP_ERROR, MessageVarList.ACCESS_DENIED_PAGETASK);
+            rd = getServletContext().getRequestDispatcher("/LoadPaymentAndBatchServlet");
+
+        } catch (SQLException sex) {
+            request.setAttribute(MessageVarList.JSP_ERROR, OracleMessage.getMessege(sex.getMessage()));
+            rd = request.getRequestDispatcher(url);
+        } catch (ValidateException ex) {
+            request.setAttribute(MessageVarList.JSP_ERROR,
+                    CardScoreManager.getScoreCardInstance().getErrorMsg());
+            rd = request.getRequestDispatcher(url);
+        } catch (Exception ex) {
+            request.setAttribute(MessageVarList.JSP_ERROR, MessageVarList.UNKNOW_ERROR);
+            rd = request.getRequestDispatcher(url);
+        } finally {
+            rd.forward(request, response);
+        }
+    }
+
+    private boolean isValidAccess(String userrole, String pagecode, String task) throws Exception {
+        boolean isValidTaskAccess = false;
+
+        try {
+            systemUserManager = new SystemUserManager();
+
+            //get all tasks for userrole for this page
+            userTaskList = systemUserManager.getTasksByPageCodeAndUserRole(userrole, pagecode);
+
+            for (String usertask : userTaskList) {
+
+                if (task.equals(usertask)) {
+                    isValidTaskAccess = true;
+                }
+            }
+            return isValidTaskAccess;
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+
+    }
+    
+    private SystemUserBean validateUser(SystemUserBean CMSSysUser) throws Exception {
+        SystemUserBean valideTempUser = null;
+        userManager = new SystemUserManager();
+        valideTempUser = userManager.validateUser(CMSSysUser);
+        return valideTempUser;
+    }
+
+    private void setAudittraceValue(HttpServletRequest request, String batId) throws Exception {
+
+        try {
+            systemAuditBean = new SystemAuditBean();
+            ////get unique Id from the page.It may be the primary key---------------
+            String uniqueId = String.valueOf(batId);
+
+            systemAuditBean.setUserRoleCode(sessionVarlist.getCMSSessionUser().getUserRole());
+            systemAuditBean.setUserName(sessionVarlist.getCMSSessionUser().getUserName());
+            //set unique id
+            systemAuditBean.setUniqueId(uniqueId);
+            //set description
+            systemAuditBean.setDescription("Update Payment Batch. Batch ID: " + uniqueId + "; by: " + sessionVarlist.getCMSSessionUser().getUserName());
+            systemAuditBean.setApplicationCode(ApplicationVarList.BACK_OFFICE);
+            systemAuditBean.setSectionCode(SectionVarList.PAYMENT);
+            systemAuditBean.setPageCode(PageVarList.BO_PAYMENT);
+            systemAuditBean.setTaskCode(TaskVarList.UPDATE);
+            systemAuditBean.setIp(request.getRemoteAddr());
+            //add remarks here
+            systemAuditBean.setRemarks(uniqueId);
+            //set field name which is being changed(only if)
+            systemAuditBean.setFieldName("");
+            //set old value of change if required
+            systemAuditBean.setOldValue("");
+            //set new value of change if required
+            systemAuditBean.setNewValue("");
+
+
+            systemAuditBean.setLastUpdateduser(sessionVarlist.getCMSSessionUser().getUserName());
+
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /** 
+     * Handles the HTTP <code>GET</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Handles the HTTP <code>POST</code> method.
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /** 
+     * Returns a short description of the servlet.
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+}

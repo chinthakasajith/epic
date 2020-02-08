@@ -1,0 +1,822 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.epic.cms.camm.applicationproccessing.capturedata.businesslogic;
+
+import com.epic.cms.admin.controlpanel.systemconfigmgt.bean.CardProductBean;
+import com.epic.cms.admin.controlpanel.systemconfigmgt.bean.ProductionModeBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.bean.SystemAuditBean;
+import com.epic.cms.admin.controlpanel.sysusermgt.businesslogic.SystemAuditManager;
+import com.epic.cms.admin.templatemgt.customertemplate.bean.CustomerTempBean;
+import com.epic.cms.camm.applicationconfirmation.bean.CardBean;
+import com.epic.cms.camm.applicationconfirmation.bean.PrimaryAppStatusBean;
+import com.epic.cms.camm.applicationconfirmation.bean.PrimaryCardsDetailBean;
+import com.epic.cms.camm.applicationconfirmation.bean.RejectReasonBean;
+import com.epic.cms.camm.applicationproccessing.assigndata.bean.ApplicationAssignBean;
+import com.epic.cms.camm.applicationproccessing.assigndata.bean.ApplicationHistoryBean;
+import com.epic.cms.camm.applicationproccessing.assigndata.bean.SearchAssignAppBean;
+import com.epic.cms.camm.applicationproccessing.assigndata.persistance.ApplicationAssignPersistance;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardApplicationBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardBankDetailsBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardDocumentBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardExpensesBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CardIncomeBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CustomerEmploymentBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.CustomerPersonalBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.DocumentUploadBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.EstablishmentAssetsBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.EstablishmentLiabilityBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.bean.SupplementaryApplicationBean;
+import com.epic.cms.camm.applicationproccessing.capturedata.persistance.AppilcationCheckingPersistance;
+import com.epic.cms.system.util.config.DBConnection;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *
+ * @author mahesh_m
+ */
+public class ApplicationCheckingManager {
+
+    private AppilcationCheckingPersistance checkingPersis;
+    private Connection CMSCon;
+    private CustomerPersonalBean personalDetail;
+    private PrimaryAppStatusBean primaryAppDetails;
+    private List<PrimaryCardsDetailBean> primaryCardList;
+    private SupplementaryApplicationBean supplementaryPersonalDetail;
+    private CardApplicationBean cardApplicationDetails;
+    private CardBean recomended;
+    private CustomerEmploymentBean employementDetails;
+    private CardExpensesBean cardExpensesDetails;
+    private List<CardIncomeBean> incomeDetailsList;
+    private List<CardBankDetailsBean> bankDetailsList;
+    private List<DocumentUploadBean> documentDetailsList;
+    private List<ApplicationAssignBean> searchList = null;
+    private List<RejectReasonBean> rejectReasons;
+    private List<ProductionModeBean> productionModeList;
+    private SystemAuditManager sysAuditManager;
+    private List<CardDocumentBean> documentList;
+    private List<CustomerTempBean> staffCusList;
+
+    public boolean addRemarks(String applicationId, String tabNumber, String remarks, String lastUpdatedUser) throws Exception {
+        boolean status = false;
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            status = checkingPersis.addRemarksToPersonalInfo(CMSCon, applicationId, tabNumber, remarks, lastUpdatedUser);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return status;
+    }
+//      
+//    public boolean  addRemarksToEmployeement(String applicationId,String remarks) throws Exception {
+//         boolean status = false;
+//        try {
+//            checkingPersis = new AppilcationCheckingPersistance();
+//            CMSCon = DBConnection.getConnection();
+//            CMSCon.setAutoCommit(false);
+//            status = checkingPersis.addRemarksToEmployement(CMSCon,applicationId,remarks);
+//
+//
+//            CMSCon.commit();
+//
+//        } catch (SQLException ex) {
+//            try {
+//                CMSCon.rollback();
+//                throw ex;
+//            } catch (Exception e) {
+//                CMSCon.rollback();
+//                throw ex;
+//            }
+//        } finally {
+//            DBConnection.dbConnectionClose(CMSCon);
+//        }
+//        return status;
+//    }
+//    
+//       public boolean  addRemarksToExpenses(String applicationId,String remarks) throws Exception {
+//         boolean status = false;
+//        try {
+//            checkingPersis = new AppilcationCheckingPersistance();
+//            CMSCon = DBConnection.getConnection();
+//            CMSCon.setAutoCommit(false);
+//            status = checkingPersis.addRemarksToIncomeExpenses(CMSCon,applicationId,remarks);
+//
+//
+//            CMSCon.commit();
+//
+//        } catch (SQLException ex) {
+//            try {
+//                CMSCon.rollback();
+//                throw ex;
+//            } catch (Exception e) {
+//                CMSCon.rollback();
+//                throw ex;
+//            }
+//        } finally {
+//            DBConnection.dbConnectionClose(CMSCon);
+//        }
+//        return status;
+//    }
+//       
+//     public boolean  addRemarksToBank(String applicationId,String remarks) throws Exception {
+//         boolean status = false;
+//        try {
+//            checkingPersis = new AppilcationCheckingPersistance();
+//            CMSCon = DBConnection.getConnection();
+//            CMSCon.setAutoCommit(false);
+//            status = checkingPersis.addRemarksToBankDetails(CMSCon,applicationId,remarks);
+//
+//
+//            CMSCon.commit();
+//
+//        } catch (SQLException ex) {
+//            try {
+//                CMSCon.rollback();
+//                throw ex;
+//            } catch (Exception e) {
+//                CMSCon.rollback();
+//                throw ex;
+//            }
+//        } finally {
+//            DBConnection.dbConnectionClose(CMSCon);
+//        }
+//        return status;
+//    }   
+//    
+
+    public CustomerPersonalBean getPersonalDetails(String applicationId) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            personalDetail = checkingPersis.getPersonalDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return personalDetail;
+    }
+
+    public PrimaryAppStatusBean getPrimaryApplicationStatusDetails(String applicationId) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            primaryAppDetails = checkingPersis.getPrimaryApplicationStatusDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return primaryAppDetails;
+    }
+
+    public List<PrimaryCardsDetailBean> getPrimaryCardHoldersCards(String primaryCardNo) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            primaryCardList = checkingPersis.getPrimaryCardHoldersCards(CMSCon, primaryCardNo);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return primaryCardList;
+    }
+
+    public SupplementaryApplicationBean getSupplementaryPersonalDetails(String applicationId) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            supplementaryPersonalDetail = checkingPersis.getSupplementaryPersonalDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return supplementaryPersonalDetail;
+    }
+
+    public CardApplicationBean getCardInfomationDetails(String applicationId) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            cardApplicationDetails = checkingPersis.getApplicationCardDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return cardApplicationDetails;
+    }
+
+    public CardBean getSysRecomendedDetails(String primaryCardNo) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            recomended = checkingPersis.getSysRecomendeddDetails(CMSCon, primaryCardNo);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return recomended;
+    }
+
+    public List<RejectReasonBean> getRejectReasons() throws Exception {
+        rejectReasons = new ArrayList<RejectReasonBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            rejectReasons = checkingPersis.getRejectReasonList(CMSCon);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return rejectReasons;
+    }
+
+    public List<ProductionModeBean> getProductionMode() throws Exception {
+        rejectReasons = new ArrayList<RejectReasonBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            productionModeList = checkingPersis.getProductionMode(CMSCon);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return productionModeList;
+    }
+
+    public String getBaseCurrency() throws Exception {
+        String baseCurrency;
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            baseCurrency = checkingPersis.getBaseCurrency(CMSCon);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return baseCurrency;
+    }
+
+    public String getCurrencyAlphaCode(String currencyCode) throws Exception {
+        String currencyAlphaCode;
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            currencyAlphaCode = checkingPersis.getCurrencyAlphaCode(CMSCon, currencyCode);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return currencyAlphaCode;
+    }
+
+    public String getSellingRate(String currencyCode) throws Exception {
+        String sellingrate;
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            sellingrate = checkingPersis.getSellingRate(CMSCon, currencyCode);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return sellingrate;
+    }
+
+    public List<CustomerTempBean> getStaffCusTemplates(String staffStatus, String currency) throws Exception {
+        staffCusList = new ArrayList<CustomerTempBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            staffCusList = checkingPersis.getStaffCusTemplates(CMSCon, staffStatus, currency);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return staffCusList;
+    }
+
+    public CustomerEmploymentBean getCardEmployementDetails(String applicationId) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            employementDetails = checkingPersis.getApplicationEmployementDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return employementDetails;
+    }
+
+    public CardExpensesBean getExpensesDetails(String applicationId) throws Exception {
+        cardExpensesDetails = new CardExpensesBean();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            cardExpensesDetails = checkingPersis.getCardExpensesDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return cardExpensesDetails;
+    }
+
+    public List<CardIncomeBean> getCardIncomeDetails(String applicationId) throws Exception {
+        incomeDetailsList = new ArrayList<CardIncomeBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            incomeDetailsList = checkingPersis.getIncomeDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return incomeDetailsList;
+    }
+
+    public List<CardBankDetailsBean> getCardBankDetailsDetails(String applicationId) throws Exception {
+        bankDetailsList = new ArrayList<CardBankDetailsBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            bankDetailsList = checkingPersis.getBankDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return bankDetailsList;
+    }
+
+    public List<CardDocumentBean> getCardDocumentDetailsDetails(String applicationId) throws Exception {
+        documentList = new ArrayList<CardDocumentBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            documentList = checkingPersis.getDocumentDetailsForConfirmation(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return documentList;
+    }
+
+    /*
+     * auther janaka hennadi
+     */
+    public List<DocumentUploadBean> getCardDocumentDetails(String applicationId) throws Exception {
+        documentDetailsList = new ArrayList<DocumentUploadBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            documentDetailsList = checkingPersis.getDocumentDetails(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return documentDetailsList;
+    }
+
+    public boolean UpdateCardApplicationStatus(String applicationId, String appStatus, SystemAuditBean systemAuditBean, ApplicationHistoryBean historyBean) throws Exception {
+        boolean status = false;
+        try {
+            ApplicationAssignPersistance history = new ApplicationAssignPersistance();
+
+            sysAuditManager = new SystemAuditManager();
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            status = checkingPersis.UpdateCardApplicationStatus(CMSCon, applicationId, appStatus);
+            history.insertApplicationHistory(CMSCon, historyBean);
+            sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return status;
+    }
+
+    public boolean updateCardApplication(String applicationId, String sysRecoCredit, String sysRecCardproduct, String creditLimit, String cardProduct, String productionMode, String cardKey, String binProfile, String custemCode, String acctempCode, String cardtempCode, String currency) throws Exception {
+        boolean status = false;
+        try {
+            sysAuditManager = new SystemAuditManager();
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            status = checkingPersis.updateCardApplication(CMSCon, applicationId, sysRecoCredit, sysRecCardproduct, creditLimit, cardProduct, productionMode, cardKey, binProfile, custemCode, acctempCode, cardtempCode, currency);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return status;
+    }
+
+    public List<ApplicationAssignBean> getAllSearchList(SearchAssignAppBean searchBean, SystemAuditBean systemAuditBean) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            sysAuditManager = new SystemAuditManager();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+
+            searchList = checkingPersis.generalSearch(CMSCon, searchBean);
+            sysAuditManager.insertAudit(systemAuditBean, CMSCon);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (SQLException sqx) {
+                throw sqx;
+            }
+
+        } catch (Exception ex) {
+            CMSCon.rollback();
+            throw ex;
+
+        } finally {
+            if (CMSCon != null) {
+                try {
+                    CMSCon.close();
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+        }
+
+        return searchList;
+    }
+
+    public CustomerPersonalBean getPersonalDetailsUsingTable(String applicationId) throws Exception {
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            personalDetail = checkingPersis.getPersonalDetailsUsingTable(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return personalDetail;
+    }
+
+    public List<EstablishmentAssetsBean> getAllAssetDetails(String businessRegNo) throws Exception {
+        List<EstablishmentAssetsBean> list = new ArrayList<EstablishmentAssetsBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            list = checkingPersis.getAllAssetDetails(CMSCon, businessRegNo);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return list;
+    }
+
+    public List<EstablishmentLiabilityBean> getAllLiabilityDetails(String appliactionId) throws Exception {
+        List<EstablishmentLiabilityBean> list = new ArrayList<EstablishmentLiabilityBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            list = checkingPersis.getAllLiabilityDetails(CMSCon, appliactionId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return list;
+    }
+
+    public CardBean getCardByApplicationId(String applicationId) throws Exception {
+        CardBean bean = new CardBean();
+
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            bean = checkingPersis.getCardByApplicationId(CMSCon, applicationId);
+
+            CMSCon.commit();
+
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+
+        return bean;
+    }
+
+    //get card product list for requested card type by chinthaka
+    public List<CardProductBean> getCardProductsToRequestedCardType() throws Exception {
+        List<CardProductBean> cardProductList = new ArrayList<CardProductBean>();
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            cardProductList = checkingPersis.getCardProductsToRequestedCardType(CMSCon);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return cardProductList;
+    }
+
+    public boolean isCreditAmountWithinTheUserConfirmRange(String userRole, double creditOfficerRecCreditLimit) throws Exception {
+        boolean isInTheRange = false;
+        try {
+            checkingPersis = new AppilcationCheckingPersistance();
+            CMSCon = DBConnection.getConnection();
+            CMSCon.setAutoCommit(false);
+            isInTheRange = checkingPersis.isCreditAmountWithinTheUserConfirmRange(CMSCon, userRole, creditOfficerRecCreditLimit);
+            CMSCon.commit();
+        } catch (SQLException ex) {
+            try {
+                CMSCon.rollback();
+                throw ex;
+            } catch (Exception e) {
+                CMSCon.rollback();
+                throw ex;
+            }
+        } finally {
+            DBConnection.dbConnectionClose(CMSCon);
+        }
+        return isInTheRange;
+    }
+
+}
